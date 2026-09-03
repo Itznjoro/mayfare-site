@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <title>Mayfare Forex Company</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="antialiased">
+  <script>
+    (function () {
+      var theme = localStorage.getItem('theme') || 'system';
+      var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) document.documentElement.classList.add('dark');
+      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    })();
+  </script>
+
+  <div class="auth-wrap">
+    <div class="auth-side">
+      <div class="auth-side-bg" style="background-image:url('images/login-bg.jpg')"></div>
+      <div class="auth-side-overlay"></div>
+      <div class="auth-side-inner">
+        <div></div>
+        <div class="auth-side-center">
+          <div class="auth-logo-badge">
+            <svg viewBox="0 0 44 45" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.4201 9.7905C19.2053 10.2438 19.4743 11.2477 19.021 12.0329L10.8134 26.2488C10.3601 27.034 9.35616 27.3029 8.57104 26.8497C7.78592 26.3964 7.51689 25.3924 7.9702 24.6073L16.1778 10.3913C16.6311 9.60622 17.635 9.33722 18.4201 9.7905ZM27.7561 13.3169C28.5412 13.7702 28.8102 14.7741 28.3569 15.5592L18.5078 32.6184C18.0545 33.4035 17.0506 33.6725 16.2655 33.2192C15.4803 32.7659 15.2113 31.762 15.6646 30.9769L25.5137 13.9177C25.967 13.1326 26.9709 12.8636 27.7561 13.3169ZM36.7357 20.7424C37.2646 19.8265 37.0569 18.7165 36.2717 18.2632C35.4866 17.8099 34.4214 18.185 33.8926 19.1009L24.317 35.6862C23.7882 36.6022 23.9959 37.7122 24.7811 38.1655C25.5662 38.6188 26.6314 38.2437 27.1602 37.3277L36.7357 20.7424Z" fill="currentColor"></path></svg>
+          </div>
+          <h2>Welcome Back</h2>
+          <p>Sign in to access your portfolio</p>
+        </div>
+        <div class="auth-side-foot"><span>© 2026 Mayfare Forex Company</span><span>Secure</span></div>
+      </div>
+    </div>
+
+    <div class="auth-main">
+      <div class="auth-box">
+        <div class="auth-mobile-logo">
+          <a href="index.html">
+            <div class="box">
+              <svg viewBox="0 0 44 45" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.4201 9.7905C19.2053 10.2438 19.4743 11.2477 19.021 12.0329L10.8134 26.2488C10.3601 27.034 9.35616 27.3029 8.57104 26.8497C7.78592 26.3964 7.51689 25.3924 7.9702 24.6073L16.1778 10.3913C16.6311 9.60622 17.635 9.33722 18.4201 9.7905ZM27.7561 13.3169C28.5412 13.7702 28.8102 14.7741 28.3569 15.5592L18.5078 32.6184C18.0545 33.4035 17.0506 33.6725 16.2655 33.2192C15.4803 32.7659 15.2113 31.762 15.6646 30.9769L25.5137 13.9177C25.967 13.1326 26.9709 12.8636 27.7561 13.3169ZM36.7357 20.7424C37.2646 19.8265 37.0569 18.7165 36.2717 18.2632C35.4866 17.8099 34.4214 18.185 33.8926 19.1009L24.317 35.6862C23.7882 36.6022 23.9959 37.7122 24.7811 38.1655C25.5662 38.6188 26.6314 38.2437 27.1602 37.3277L36.7357 20.7424Z" fill="currentColor"></path></svg>
+            </div>
+            <span class="name">Mayfare Forex Company</span>
+          </a>
+        </div>
+        <h1 class="auth-title">Sign in</h1>
+        <p class="auth-sub">Enter your credentials</p>
+        <form class="auth-form">
+          <div class="auth-error" id="authError" style="display:none;"></div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="name@example.com" required="" value="" />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="••••••••" required="" value="" />
+            <div class="field-forgot-row"><a href="forgot-password.html">Forgot?</a></div>
+          </div>
+          <button type="submit" class="btn-auth">Sign in</button>
+        </form>
+        <div class="auth-switch">No account? <a href="signup.html">Sign up</a></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var form = document.querySelector('.auth-form');
+    var errorBox = document.getElementById('authError');
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var submitDefaultText = submitBtn.textContent;
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.style.display = 'block';
+    }
+    function hideError() {
+      errorBox.style.display = 'none';
+    }
+    function setLoading(isLoading) {
+      submitBtn.disabled = isLoading;
+      submitBtn.textContent = isLoading ? 'Signing in…' : submitDefaultText;
+    }
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      hideError();
+      setLoading(true);
+
+      var email = form.email.value.trim();
+      var password = form.password.value;
+
+      try {
+        var res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        var data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error || 'Something went wrong. Please try again.');
+          setLoading(false);
+          return;
+        }
+
+        localStorage.setItem('mayfare_logged_in', '1');
+        window.location.href = 'pages/app.html';
+      } catch (err) {
+        showError('Could not reach the server. Please check your connection and try again.');
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>

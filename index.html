@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Mayfare Forex Company — grow your crypto with our proven trading pool." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <title>Mayfare Forex Company</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="antialiased">
+  <script>
+    (function () {
+      var theme = localStorage.getItem('theme') || 'system';
+      var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) document.documentElement.classList.add('dark');
+      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    })();
+  </script>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">
+        <svg class="logo-icon" viewBox="0 0 44 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M18.4201 9.7905C19.2053 10.2438 19.4743 11.2477 19.021 12.0329L10.8134 26.2488C10.3601 27.034 9.35616 27.3029 8.57104 26.8497C7.78592 26.3964 7.51689 25.3924 7.9702 24.6073L16.1778 10.3913C16.6311 9.60622 17.635 9.33722 18.4201 9.7905ZM27.7561 13.3169C28.5412 13.7702 28.8102 14.7741 28.3569 15.5592L18.5078 32.6184C18.0545 33.4035 17.0506 33.6725 16.2655 33.2192C15.4803 32.7659 15.2113 31.762 15.6646 30.9769L25.5137 13.9177C25.967 13.1326 26.9709 12.8636 27.7561 13.3169ZM36.7357 20.7424C37.2646 19.8265 37.0569 18.7165 36.2717 18.2632C35.4866 17.8099 34.4214 18.185 33.8926 19.1009L24.317 35.6862C23.7882 36.6022 23.9959 37.7122 24.7811 38.1655C25.5662 38.6188 26.6314 38.2437 27.1602 37.3277L36.7357 20.7424Z" fill="currentColor"></path>
+          <path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M26.5658 8.82095C27.0191 8.03583 26.7501 7.03188 25.965 6.57859C25.1799 6.1253 24.1759 6.39431 23.7227 7.17943L8.949 32.7682C8.49569 33.5533 8.76471 34.5572 9.54983 35.0105C10.335 35.4638 11.3389 35.1948 11.7922 34.4097L26.5658 8.82095ZM30.3507 21.9609C30.8398 21.1139 30.5998 20.0597 29.8146 19.6064C29.0295 19.1531 27.9966 19.4723 27.5075 20.3194L22.1946 29.5216C21.7056 30.3686 21.9456 31.4227 22.7308 31.876C23.5159 32.3293 24.5488 32.0102 25.0378 31.1631L30.3507 21.9609ZM36.4308 27.8462C37.216 28.2995 37.485 29.3034 37.0317 30.0885L35.3901 32.9317C34.9368 33.7169 33.9329 33.9859 33.1478 33.5326C32.3626 33.0792 32.0936 32.0753 32.547 31.2902L34.1885 28.447C34.6418 27.6619 35.6457 27.3929 36.4308 27.8462ZM11.5007 15.2144C11.9641 14.4118 11.7032 13.3937 10.9181 12.9404C10.133 12.4871 9.1209 12.7703 8.65749 13.5729L6.9794 16.4794C6.516 17.2821 6.77684 18.3002 7.56196 18.7535C8.34708 19.2068 9.35919 18.9236 9.8226 18.121L11.5007 15.2144Z" fill="currentColor"></path>
+        </svg>
+        <span class="brand-name">Mayfare Forex Company</span>
+      </a>
+
+      <nav class="main-nav">
+        <a href="#plans">Plans</a>
+        <a href="#services">Services</a>
+        <a href="#how-it-works">How it Works</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="btn-telegram" href="https://t.me/trader_sadiqfx" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"><path d="M20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12.3584 9.38246C11.3857 9.78702 9.4418 10.6244 6.5266 11.8945C6.05321 12.0827 5.80524 12.2669 5.78266 12.4469C5.74451 12.7513 6.12561 12.8711 6.64458 13.0343C6.71517 13.0565 6.78832 13.0795 6.8633 13.1039C7.37388 13.2698 8.06071 13.464 8.41776 13.4717C8.74164 13.4787 9.10313 13.3452 9.50222 13.0711C12.226 11.2325 13.632 10.3032 13.7203 10.2832C13.7826 10.269 13.8689 10.2513 13.9273 10.3032C13.9858 10.3552 13.98 10.4536 13.9739 10.48C13.9361 10.641 12.4401 12.0318 11.6659 12.7515C11.4351 12.9661 11.2101 13.1853 10.9833 13.4039C10.509 13.8611 10.1533 14.204 11.003 14.764C11.8644 15.3317 12.7323 15.8982 13.5724 16.4971C13.9867 16.7925 14.359 17.0579 14.8188 17.0156C15.0861 16.991 15.3621 16.7397 15.5022 15.9903C15.8335 14.2193 16.4847 10.3821 16.6352 8.80083C16.6484 8.6623 16.6318 8.485 16.6185 8.40717C16.6052 8.32934 16.5773 8.21844 16.4762 8.13635C16.3563 8.03913 16.1714 8.01863 16.0887 8.02009C15.7125 8.02672 15.1355 8.22737 12.3584 9.38246Z"></path></svg>
+          Telegram
+        </a>
+        <a class="btn-login" href="login.html">Log in</a>
+        <a class="btn-get-started" href="signup.html">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-bg">
+        <img src="images/hero-gemini.webp" alt="Hero" />
+      </div>
+      <div class="hero-content">
+        <div class="hero-inner">
+          <div class="hero-grid">
+            <div class="hero-copy">
+              <h1 class="hero-text">Your Crypto <br /><span>Always In Profit</span></h1>
+              <p class="hero-sub hero-text">Join Mayfare Forex Company proven trading pool. Choose your plan and receive guaranteed fixed returns on your deposit.</p>
+              <div class="hero-ctas hero-text">
+                <a class="btn-view-plans" href="#plans">View Plans
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"></path></svg>
+                </a>
+                <a class="btn-telegram-hero" href="https://t.me/trader_sadiqfx" target="_blank" rel="noopener noreferrer">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"><path d="M20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12.3584 9.38246C11.3857 9.78702 9.4418 10.6244 6.5266 11.8945C6.05321 12.0827 5.80524 12.2669 5.78266 12.4469C5.74451 12.7513 6.12561 12.8711 6.64458 13.0343C6.71517 13.0565 6.78832 13.0795 6.8633 13.1039C7.37388 13.2698 8.06071 13.464 8.41776 13.4717C8.74164 13.4787 9.10313 13.3452 9.50222 13.0711C12.226 11.2325 13.632 10.3032 13.7203 10.2832C13.7826 10.269 13.8689 10.2513 13.9273 10.3032C13.9858 10.3552 13.98 10.4536 13.9739 10.48C13.9361 10.641 12.4401 12.0318 11.6659 12.7515C11.4351 12.9661 11.2101 13.1853 10.9833 13.4039C10.509 13.8611 10.1533 14.204 11.003 14.764C11.8644 15.3317 12.7323 15.8982 13.5724 16.4971C13.9867 16.7925 14.359 17.0579 14.8188 17.0156C15.0861 16.991 15.3621 16.7397 15.5022 15.9903C15.8335 14.2193 16.4847 10.3821 16.6352 8.80083C16.6484 8.6623 16.6318 8.485 16.6185 8.40717C16.6052 8.32934 16.5773 8.21844 16.4762 8.13635C16.3563 8.03913 16.1714 8.01863 16.0887 8.02009C15.7125 8.02672 15.1355 8.22737 12.3584 9.38246Z"></path></svg>
+                  Message on Telegram
+                </a>
+              </div>
+              <div class="hero-stats hero-text">
+                <div class="hero-stat"><div class="val">10x</div><div class="lbl">48H Returns</div></div>
+                <div class="hero-stat"><div class="val">10x</div><div class="lbl">Weekly Returns</div></div>
+                <div class="hero-stat"><div class="val">100%</div><div class="lbl">Success Rate</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TICKER -->
+    <div class="ticker-wrap">
+      <div class="ticker-track" id="tickerTrack">
+        <div class="ticker-item" data-coin="bitcoin"><span class="ticker-sym">BTC</span><span class="ticker-price">$43,245</span><span class="ticker-pct">+2.34%</span><span class="ticker-dot"></span></div>
+        <div class="ticker-item" data-coin="ethereum"><span class="ticker-sym">ETH</span><span class="ticker-price">$2,342</span><span class="ticker-pct">+1.87%</span><span class="ticker-dot"></span></div>
+        <div class="ticker-item" data-coin="solana"><span class="ticker-sym">SOL</span><span class="ticker-price">$108.50</span><span class="ticker-pct">+4.21%</span><span class="ticker-dot"></span></div>
+        <div class="ticker-item" data-coin="binancecoin"><span class="ticker-sym">BNB</span><span class="ticker-price">$312.80</span><span class="ticker-pct">+0.92%</span><span class="ticker-dot"></span></div>
+        <div class="ticker-item" data-coin="ripple"><span class="ticker-sym">XRP</span><span class="ticker-price">$0.62</span><span class="ticker-pct">+1.45%</span><span class="ticker-dot"></span></div>
+        <div class="ticker-item" data-coin="cardano"><span class="ticker-sym">ADA</span><span class="ticker-price">$0.58</span><span class="ticker-pct down">-0.34%</span><span class="ticker-dot down"></span></div>
+        <div class="ticker-item" data-coin="dogecoin"><span class="ticker-sym">DOGE</span><span class="ticker-price">$0.12</span><span class="ticker-pct">+3.21%</span><span class="ticker-dot"></span></div>
+        <div class="ticker-item" data-coin="avalanche-2"><span class="ticker-sym">AVAX</span><span class="ticker-price">$38.90</span><span class="ticker-pct">+2.11%</span><span class="ticker-dot"></span></div>
+      </div>
+    </div>
+
+    <!-- LIVE POOL STATS -->
+    <section class="section pool-stats section-canvas">
+      <div class="grid-bg"></div>
+      <div style="position:relative;z-index:10;">
+        <div class="section-head">
+          <div class="eyebrow">
+            <span class="eyebrow-dot"></span>
+            <span class="eyebrow-label">Live Pool Statistics</span>
+          </div>
+          <h2 class="section-title">REAL-TIME PERFORMANCE</h2>
+          <p class="section-sub">Our crypto trading pool runs 24/7 across BTC, ETH, SOL, BNB and top altcoin markets.</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card span-2">
+            <div class="stat-status"><span>Status: Nominal</span></div>
+            <div class="stat-label">Total Pool (USDT)</div>
+            <div class="stat-value"><span class="num">$284,750</span></div>
+            <div class="stat-foot">
+              <span class="stat-badge">+12.4%</span>
+              <svg class="stat-chart" width="80" height="24" viewBox="0 0 80 24" preserveAspectRatio="none"><polyline fill="none" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,24 7.27,19 14.55,21.33 21.82,15.67 29.09,13.33 36.36,14.67 43.64,9 50.91,6.67 58.18,8 65.45,2.33 72.73,0 80,1.33"></polyline><circle cx="80" cy="5.33" r="2" fill="#84CC16"></circle></svg>
+            </div>
+            <div class="stat-updated"><span>Updated: Just now</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-status"><span>Status: Nominal</span></div>
+            <div class="stat-label">Cycles Completed</div>
+            <div class="stat-value"><span class="num">1,842</span></div>
+            <div class="stat-foot">
+              <span class="stat-badge">+28</span>
+              <svg class="stat-chart" width="80" height="24" viewBox="0 0 80 24" preserveAspectRatio="none"><polyline fill="none" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,24 7.27,21.14 14.55,22.86 21.82,18.29 29.09,15.43 36.36,17.14 43.64,12.57 50.91,9.71 58.18,6.86 65.45,4 72.73,2.29 80,0"></polyline><circle cx="80" cy="5.71" r="2" fill="#84CC16"></circle></svg>
+            </div>
+            <div class="stat-updated"><span>Updated: Just now</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-status"><span>Status: Nominal</span></div>
+            <div class="stat-label">Active Stakers</div>
+            <div class="stat-value"><span class="num">2,413</span></div>
+            <div class="stat-foot">
+              <span class="stat-badge">+156</span>
+              <svg class="stat-chart" width="80" height="24" viewBox="0 0 80 24" preserveAspectRatio="none"><polyline fill="none" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,24 7.27,21.33 14.55,18.67 21.82,19.73 29.09,16 36.36,13.33 43.64,10.67 50.91,12.27 58.18,8 65.45,5.33 72.73,2.67 80,0"></polyline><circle cx="80" cy="16" r="2" fill="#84CC16"></circle></svg>
+            </div>
+            <div class="stat-updated"><span>Updated: Just now</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-status"><span>Status: Nominal</span></div>
+            <div class="stat-label">Total Paid Out</div>
+            <div class="stat-value"><span class="num">$97,400</span></div>
+            <div class="stat-foot">
+              <span class="stat-badge">+$18.2K</span>
+              <svg class="stat-chart" width="80" height="24" viewBox="0 0 80 24" preserveAspectRatio="none"><polyline fill="none" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,21.33 7.27,24 14.55,18.67 21.82,16 29.09,17.07 36.36,13.33 43.64,10.67 50.91,8 58.18,5.33 65.45,6.4 72.73,2.67 80,0"></polyline><circle cx="80" cy="24" r="2" fill="#84CC16"></circle></svg>
+            </div>
+            <div class="stat-updated"><span>Updated: Just now</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-status"><span>Status: Nominal</span></div>
+            <div class="stat-label">48H Cycle Return</div>
+            <div class="stat-value"><span class="num">10</span><span class="unit">x</span></div>
+            <div class="stat-foot">
+              <span class="stat-badge">+0.8</span>
+              <svg class="stat-chart" width="80" height="24" viewBox="0 0 80 24" preserveAspectRatio="none"><polyline fill="none" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,24 7.27,22.29 14.55,19.71 21.82,17.14 29.09,15.43 36.36,13.71 43.64,11.14 50.91,8.57 58.18,6.86 65.45,5.14 72.73,2.57 80,0"></polyline><circle cx="80" cy="34.29" r="2" fill="#84CC16"></circle></svg>
+            </div>
+            <div class="stat-updated"><span>Updated: Just now</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-status"><span>Status: Nominal</span></div>
+            <div class="stat-label">Weekly Cycle Return</div>
+            <div class="stat-value"><span class="num">10</span><span class="unit">x</span></div>
+            <div class="stat-foot">
+              <span class="stat-badge">+1.2</span>
+              <svg class="stat-chart" width="80" height="24" viewBox="0 0 80 24" preserveAspectRatio="none"><polyline fill="none" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,24 7.27,21.82 14.55,19.64 21.82,17.45 29.09,15.27 36.36,13.09 43.64,10.91 50.91,8.73 58.18,6.55 65.45,4.36 72.73,2.18 80,0"></polyline><circle cx="80" cy="15.27" r="2" fill="#84CC16"></circle></svg>
+            </div>
+            <div class="stat-updated"><span>Updated: Just now</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLANS -->
+    <section id="plans" class="section plans-section section-canvas">
+      <div class="dot-bg"></div>
+      <div style="position:relative;z-index:10;">
+        <div class="plans-head">
+          <div class="now-active"><span class="dot"></span>Now active</div>
+          <h2>Mayfare Forex Company Pool Trading Program is now active</h2>
+          <p>This program is tailored for busy individuals who may not have the time or experience to trade independently, as well as traders who find it challenging to consistently follow trading signals. Our pool trading system is professionally managed to deliver steady performance, efficiency, and dependable results.</p>
+        </div>
+
+        <div class="plans-grid">
+          <!-- 48-hour plan -->
+          <div class="plan-card-anim hidden-start" id="plan48">
+            <div class="plan-card default">
+              <div class="plan-top">
+                <div class="plan-id">
+                  <div class="plan-icon">
+                    <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                  </div>
+                  <div class="plan-name">
+                    <h3>48-Hour Investment Plan</h3>
+                    <p>Profits paid within 48 hours</p>
+                  </div>
+                </div>
+                <div class="plan-return"><span>10x Returns</span></div>
+              </div>
+              <div class="plan-table-wrap">
+                <div class="plan-table">
+                  <div class="plan-thead"><span>Deposit</span><span>Return</span><span>Profit</span></div>
+                  <div class="plan-row"><span class="dep">$500</span><span class="ret">$5,000</span><span class="pro">+$4,500</span></div>
+                  <div class="plan-row"><span class="dep">$800</span><span class="ret">$8,000</span><span class="pro">+$7,200</span></div>
+                  <div class="plan-row"><span class="dep">$1,000</span><span class="ret">$10,000</span><span class="pro">+$9,000</span></div>
+                  <div class="plan-row"><span class="dep">$1,500</span><span class="ret">$15,000</span><span class="pro">+$13,500</span></div>
+                  <div class="plan-row"><span class="dep">$2,000</span><span class="ret">$20,000</span><span class="pro">+$18,000</span></div>
+                </div>
+              </div>
+              <a class="plan-cta default" href="signup.html">Start 48H Cycle</a>
+            </div>
+          </div>
+
+          <!-- Weekly plan -->
+          <div class="plan-card-anim hidden-start" id="planWeekly">
+            <div class="plan-card featured" style="position:relative;">
+              <div class="plan-badge"><span>BEST VALUE</span></div>
+              <div class="plan-top">
+                <div class="plan-id">
+                  <div class="plan-icon">
+                    <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5"><path d="M3 3v18h18" stroke-linecap="round" stroke-linejoin="round"></path><path d="M7 14l4-4 4 4 5-5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  </div>
+                  <div class="plan-name">
+                    <h3>Weekly Investment Plan</h3>
+                    <p>Profits paid after 7 days</p>
+                  </div>
+                </div>
+                <div class="plan-return featured"><span>10x Returns</span></div>
+              </div>
+              <div class="plan-table-wrap">
+                <div class="plan-table">
+                  <div class="plan-thead"><span>Deposit</span><span>Return</span><span>Profit</span></div>
+                  <div class="plan-row"><span class="dep">$2,000</span><span class="ret">$20,000</span><span class="pro">+$18,000</span></div>
+                  <div class="plan-row"><span class="dep">$3,000</span><span class="ret">$30,000</span><span class="pro">+$27,000</span></div>
+                  <div class="plan-row"><span class="dep">$4,000</span><span class="ret">$40,000</span><span class="pro">+$36,000</span></div>
+                  <div class="plan-row"><span class="dep">$5,000</span><span class="ret">$50,000</span><span class="pro">+$45,000</span></div>
+                  <div class="plan-row"><span class="dep">$6,000</span><span class="ret">$60,000</span><span class="pro">+$54,000</span></div>
+                  <div class="plan-row"><span class="dep">$7,000</span><span class="ret">$70,000</span><span class="pro">+$63,000</span></div>
+                </div>
+              </div>
+              <a class="plan-cta featured" href="signup.html">Start Weekly Cycle</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="plans-foot reveal">
+          <p>We are committed to achieving strong outcomes through expertly managed trading strategies with a win rate of <span class="win">89%</span>.</p>
+          <a class="btn-dm-admin" href="https://t.me/trader_sadiqfx" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"><path d="M20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12.3584 9.38246C11.3857 9.78702 9.4418 10.6244 6.5266 11.8945C6.05321 12.0827 5.80524 12.2669 5.78266 12.4469C5.74451 12.7513 6.12561 12.8711 6.64458 13.0343C6.71517 13.0565 6.78832 13.0795 6.8633 13.1039C7.37388 13.2698 8.06071 13.464 8.41776 13.4717C8.74164 13.4787 9.10313 13.3452 9.50222 13.0711C12.226 11.2325 13.632 10.3032 13.7203 10.2832C13.7826 10.269 13.8689 10.2513 13.9273 10.3032C13.9858 10.3552 13.98 10.4536 13.9739 10.48C13.9361 10.641 12.4401 12.0318 11.6659 12.7515C11.4351 12.9661 11.2101 13.1853 10.9833 13.4039C10.509 13.8611 10.1533 14.204 11.003 14.764C11.8644 15.3317 12.7323 15.8982 13.5724 16.4971C13.9867 16.7925 14.359 17.0579 14.8188 17.0156C15.0861 16.991 15.3621 16.7397 15.5022 15.9903C15.8335 14.2193 16.4847 10.3821 16.6352 8.80083C16.6484 8.6623 16.6318 8.485 16.6185 8.40717C16.6052 8.32934 16.5773 8.21844 16.4762 8.13635C16.3563 8.03913 16.1714 8.01863 16.0887 8.02009C15.7125 8.02672 15.1355 8.22737 12.3584 9.38246Z"></path></svg>
+            DM the admin now to secure your spot
+          </a>
+          <p class="footnote">Capital in USDT (TRC20) or BTC. Returns shown per plan</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services" class="services-section">
+      <div class="services-head">
+        <h2>Premium Offerings</h2>
+        <p>Go beyond the pool. Get direct access to our expert traders through premium one-on-one sessions, mentorship, and real-time signals.</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card-anim">
+          <div class="service-card">
+            <div class="service-tag orange"><span>High Demand</span></div>
+            <h3>ONE-ON-ONE LIVE TRADING SESSION</h3>
+            <p class="service-desc">Trade live alongside our senior analyst in a private session tailored to your portfolio and goals. Watch real trades unfold in real time and ask anything.</p>
+            <div class="service-feats">
+              <div class="service-feat"><span class="check">✓</span>60-minute private video session</div>
+              <div class="service-feat"><span class="check">✓</span>Live market analysis</div>
+              <div class="service-feat"><span class="check">✓</span>Real-time trade walkthrough</div>
+              <div class="service-feat"><span class="check">✓</span>Session recording</div>
+              <div class="service-feat"><span class="check">✓</span>Q&amp;A on strategy</div>
+            </div>
+            <div class="service-price"><span class="amount">$1,000</span><span class="period">Per session - One-time</span></div>
+            <a href="https://t.me/trader_sadiqfx" class="service-cta default">Book Session</a>
+          </div>
+        </div>
+
+        <div class="service-card-anim">
+          <div class="service-card featured">
+            <div class="service-tag popular"><span>Most Popular</span></div>
+            <h3>CRYPTO MENTORSHIP PROGRAM</h3>
+            <p class="service-desc">A structured mentorship program to take you from beginner to confident crypto trader. Get a personal roadmap, weekly check-ins, and hands-on guidance.</p>
+            <div class="service-feats">
+              <div class="service-feat"><span class="check">✓</span>Personalised trading roadmap</div>
+              <div class="service-feat"><span class="check">✓</span>Weekly 1-on-1 check-in (4/month)</div>
+              <div class="service-feat"><span class="check">✓</span>Private trading playbook</div>
+              <div class="service-feat"><span class="check">✓</span>Technical analysis fundamentals</div>
+              <div class="service-feat"><span class="check">✓</span>Portfolio review and coaching</div>
+            </div>
+            <div class="service-price"><span class="amount">$500</span><span class="period">Per month - Ongoing</span></div>
+            <a href="https://t.me/trader_sadiqfx" class="service-cta featured">Enroll Now</a>
+          </div>
+        </div>
+
+        <div class="service-card-anim">
+          <div class="service-card">
+            <div class="service-tag blue"><span>Monthly Sub</span></div>
+            <h3>VIP CRYPTO SIGNALS MEMBERSHIP</h3>
+            <p class="service-desc">Get high-probability trade signals delivered directly to your Telegram - with precise entry, take-profit, and stop-loss levels. No guesswork, just actionable calls.</p>
+            <div class="service-feats">
+              <div class="service-feat"><span class="check">✓</span>5-10 premium signals per week</div>
+              <div class="service-feat"><span class="check">✓</span>Entry, TP1, TP2 and stop-loss</div>
+              <div class="service-feat"><span class="check">✓</span>Monday market briefing</div>
+              <div class="service-feat"><span class="check">✓</span>VIP-only Telegram group</div>
+              <div class="service-feat"><span class="check">✓</span>Monthly win rate tracker</div>
+            </div>
+            <div class="service-price"><span class="amount">$350</span><span class="period">Per month - Cancel anytime</span></div>
+            <a href="https://t.me/trader_sadiqfx" class="service-cta default">Get Access</a>
+            <a href="https://t.me/trader_sadiqfx" class="service-mini">Preview on Telegram</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how-it-works" class="how-section">
+      <div class="how-inner">
+        <div class="how-head reveal">
+          <div class="how-badge">How It Works</div>
+          <h2>Get Started in Minutes</h2>
+          <p>Four simple steps to start growing your crypto.</p>
+        </div>
+
+        <!-- mobile -->
+        <div class="tl-mobile" id="tlMobile">
+          <div class="tl-line"><div class="mobile-fill" id="tlFillMobile"></div></div>
+          <div class="tl-steps-mobile">
+            <div class="step-row">
+              <div class="step-node"><span>01</span></div>
+              <div class="step-body"><p class="t">Message us</p><p class="d">Reach the team on Telegram</p></div>
+            </div>
+            <div class="step-row">
+              <div class="step-node"><span>02</span></div>
+              <div class="step-body"><p class="t">Choose Cycle</p><p class="d">48h or weekly</p></div>
+            </div>
+            <div class="step-row">
+              <div class="step-node"><span>03</span></div>
+              <div class="step-body"><p class="t">Send Crypto</p><p class="d">USDT confirmed in 1h</p></div>
+            </div>
+            <div class="step-row">
+              <div class="step-node"><span>04</span></div>
+              <div class="step-body"><p class="t">Receive Return</p><p class="d">Full USDT return</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- desktop -->
+        <div class="tl-desktop" id="tlDesktop">
+          <div class="tl-line-center"><div class="tl-fill-center" id="tlFillDesktop"></div></div>
+
+          <div class="tl-step">
+            <div class="step-side left">
+              <span class="step-number">01</span>
+              <p class="step-title">Message on Telegram</p>
+              <p class="step-desc">Connect with the team</p>
+            </div>
+            <div class="step-node-center"><div class="step-circle"><div class="step-dot"></div></div></div>
+            <div class="step-side right"></div>
+          </div>
+
+          <div class="tl-step">
+            <div class="step-side left"></div>
+            <div class="step-node-center"><div class="step-circle"><div class="step-dot"></div></div></div>
+            <div class="step-side right">
+              <span class="step-number">02</span>
+              <p class="step-title">Choose Your Cycle</p>
+              <p class="step-desc">Pick 48h or weekly</p>
+            </div>
+          </div>
+
+          <div class="tl-step">
+            <div class="step-side left">
+              <span class="step-number">03</span>
+              <p class="step-title">Send Your Crypto</p>
+              <p class="step-desc">USDT confirmed in 1 hour</p>
+            </div>
+            <div class="step-node-center"><div class="step-circle"><div class="step-dot"></div></div></div>
+            <div class="step-side right"></div>
+          </div>
+
+          <div class="tl-step">
+            <div class="step-side left"></div>
+            <div class="step-node-center"><div class="step-circle"><div class="step-dot"></div></div></div>
+            <div class="step-side right">
+              <span class="step-number">04</span>
+              <p class="step-title">Receive Return</p>
+              <p class="step-desc">Full return in USDT</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="how-cta">
+          <a href="https://t.me/trader_sadiqfx" class="btn-how-cta">Message on Telegram</a>
+          <span class="how-cta-note">Replies within minutes</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADVANCED TRADERS BANNER -->
+    <section class="at-banner">
+      <div class="at-bg"><img src="images/advanced-traders.webp" alt="Advanced Traders" /></div>
+      <div class="at-overlay"></div>
+      <div class="at-content">
+        <h2>Built for Everyone</h2>
+        <p>Professional-grade trading infrastructure for all levels</p>
+        <a href="https://t.me/trader_sadiqfx" target="_blank" rel="noopener noreferrer" class="btn-at-cta">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"><path d="M20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12.3584 9.38246C11.3857 9.78702 9.4418 10.6244 6.5266 11.8945C6.05321 12.0827 5.80524 12.2669 5.78266 12.4469C5.74451 12.7513 6.12561 12.8711 6.64458 13.0343C6.71517 13.0565 6.78832 13.0795 6.8633 13.1039C7.37388 13.2698 8.06071 13.464 8.41776 13.4717C8.74164 13.4787 9.10313 13.3452 9.50222 13.0711C12.226 11.2325 13.632 10.3032 13.7203 10.2832C13.7826 10.269 13.8689 10.2513 13.9273 10.3032C13.9858 10.3552 13.98 10.4536 13.9739 10.48C13.9361 10.641 12.4401 12.0318 11.6659 12.7515C11.4351 12.9661 11.2101 13.1853 10.9833 13.4039C10.509 13.8611 10.1533 14.204 11.003 14.764C11.8644 15.3317 12.7323 15.8982 13.5724 16.4971C13.9867 16.7925 14.359 17.0579 14.8188 17.0156C15.0861 16.991 15.3621 16.7397 15.5022 15.9903C15.8335 14.2193 16.4847 10.3821 16.6352 8.80083C16.6484 8.6623 16.6318 8.485 16.6185 8.40717C16.6052 8.32934 16.5773 8.21844 16.4762 8.13635C16.3563 8.03913 16.1714 8.01863 16.0887 8.02009C15.7125 8.02672 15.1355 8.22737 12.3584 9.38246Z"></path></svg>
+          Message us
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <span class="footer-brand">Mayfare Forex Company</span>
+        <p class="footer-copy">© 2026 Mayfare Forex Company. All rights reserved</p>
+      </div>
+      <div class="footer-legal"><p>Crypto trading involves risk</p></div>
+    </div>
+  </footer>
+
+  <div class="float-telegram" id="floatTelegram">
+    <a href="https://t.me/trader_sadiqfx" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:1rem;color:#fff;">
+      <span class="live"><span class="dot"></span><span>2,413 traders in the live pool</span></span>
+      <svg class="send" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+    </a>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

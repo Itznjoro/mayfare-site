@@ -1,0 +1,22 @@
+{
+  "name": "mayfare-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "pg": "^8.23.0",
+    "bcryptjs": "^3.0.3",
+    "drizzle-orm": "^0.45.2"
+  },
+  "devDependencies": {
+    "@vercel/node": "^10.0.0",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.23.1"
+  }
+}
