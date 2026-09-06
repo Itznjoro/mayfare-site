@@ -310,53 +310,18 @@
                                             <circle cx="11" cy="11" r="8" />
                                             <line x1="21" y1="21" x2="16.65" y2="16.65" />
                                         </svg>
-                                        <input placeholder="Search ID..." class="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:border-[oklch(0.62_0.12_178)] focus:ring-1 focus:ring-ring" type="text" value="">
+                                        <input placeholder="Search ID..." id="txSearchInput" class="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:border-[oklch(0.62_0.12_178)] focus:ring-1 focus:ring-ring" type="text" value="">
                                     </div>
-                                    <div class="flex gap-1 overflow-x-auto pb-1 sm:pb-0">
-                                        <button class="px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-primary text-primary-foreground">All</button>
-                                        <button class="px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-secondary text-muted-foreground hover:text-foreground">Deposit</button>
-                                        <button class="px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-secondary text-muted-foreground hover:text-foreground">Return</button>
-                                        <button class="px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-secondary text-muted-foreground hover:text-foreground">Withdraw</button>
+                                    <div class="flex gap-1 overflow-x-auto pb-1 sm:pb-0" id="txFilterButtons">
+                                        <button data-filter="all" class="px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-primary text-primary-foreground">All</button>
+                                        <button data-filter="deposit" class="px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-secondary text-muted-foreground hover:text-foreground">Deposit</button>
+                                        <button data-filter="return" class="px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-secondary text-muted-foreground hover:text-foreground">Return</button>
+                                        <button data-filter="withdraw" class="px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-secondary text-muted-foreground hover:text-foreground">Withdraw</button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="block lg:hidden space-y-2">
-                                <div class="bg-card border border-border rounded-lg p-3 cursor-pointer hover:border-[oklch(0.62_0.12_178)/30] transition-all">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-[10px] sm:text-xs font-mono text-muted-foreground">cmte4l3pc002</span>
-                                        <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-medium bg-red-500/20 text-red-400">Investment</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <div class="text-sm sm:text-base font-medium text-foreground">
-                                                <span>+$500</span>
-                                            </div>
-                                            <div class="text-[10px] text-muted-foreground">Aug 29, 2026 • 11:35 AM</div>
-                                        </div>
-                                        <div class="text-right">
-                                            <div class="text-xs font-medium text-muted-foreground">Net</div>
-                                            <div class="text-sm font-medium text-foreground">$500</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="bg-card border border-border rounded-lg p-3 cursor-pointer hover:border-[oklch(0.62_0.12_178)/30] transition-all">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-[10px] sm:text-xs font-mono text-muted-foreground">cmte4kort002</span>
-                                        <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-medium bg-red-500/20 text-red-400">Investment</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <div class="text-sm sm:text-base font-medium text-foreground">
-                                                <span>+$500</span>
-                                            </div>
-                                            <div class="text-[10px] text-muted-foreground">Aug 29, 2026 • 11:35 AM</div>
-                                        </div>
-                                        <div class="text-right">
-                                            <div class="text-xs font-medium text-muted-foreground">Net</div>
-                                            <div class="text-sm font-medium text-foreground">$500</div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="block lg:hidden space-y-2" id="txMobileList">
+                                <div class="bg-card border border-border rounded-lg p-6 text-center text-xs sm:text-sm text-muted-foreground" id="txMobileEmpty">No transactions yet. Once you make a deposit, it'll show up here.</div>
                             </div>
                             <div class="hidden lg:block bg-card border border-border rounded-lg overflow-hidden">
                                 <div class="overflow-x-auto">
@@ -371,54 +336,9 @@
                                                 <th class="px-4 py-3 text-left text-[10px] font-mono uppercase text-muted-foreground">Note</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-border">
-                                            <tr class="hover:bg-secondary/30 transition-colors cursor-pointer">
-                                                <td class="px-4 py-3">
-                                                    <span class="text-xs font-mono text-muted-foreground">cmte4l3pc002</span>
-                                                </td>
-                                                <td class="px-4 py-3">
-                                                    <div class="text-sm text-foreground">Aug 29, 2026</div>
-                                                    <div class="text-[10px] text-muted-foreground">11:35 AM</div>
-                                                </td>
-                                                <td class="px-4 py-3">
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-red-500/20 text-red-400">Investment</span>
-                                                </td>
-                                                <td class="px-4 py-3 text-right">
-                                                    <div class="text-sm font-medium tabular-nums text-foreground">
-                                                        <span>+$500</span>
-                                                    </div>
-                                                    <div class="text-[10px] text-muted-foreground">USDT</div>
-                                                </td>
-                                                <td class="px-4 py-3 text-right">
-                                                    <div class="text-sm font-medium tabular-nums text-foreground">$500</div>
-                                                </td>
-                                                <td class="px-4 py-3">
-                                                    <div class="text-xs text-muted-foreground max-w-[180px] truncate">Weekly Pool investment activated</div>
-                                                </td>
-                                            </tr>
-                                            <tr class="hover:bg-secondary/30 transition-colors cursor-pointer">
-                                                <td class="px-4 py-3">
-                                                    <span class="text-xs font-mono text-muted-foreground">cmte4kort002</span>
-                                                </td>
-                                                <td class="px-4 py-3">
-                                                    <div class="text-sm text-foreground">Aug 29, 2026</div>
-                                                    <div class="text-[10px] text-muted-foreground">11:35 AM</div>
-                                                </td>
-                                                <td class="px-4 py-3">
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-red-500/20 text-red-400">Investment</span>
-                                                </td>
-                                                <td class="px-4 py-3 text-right">
-                                                    <div class="text-sm font-medium tabular-nums text-foreground">
-                                                        <span>+$500</span>
-                                                    </div>
-                                                    <div class="text-[10px] text-muted-foreground">USDT</div>
-                                                </td>
-                                                <td class="px-4 py-3 text-right">
-                                                    <div class="text-sm font-medium tabular-nums text-foreground">$500</div>
-                                                </td>
-                                                <td class="px-4 py-3">
-                                                    <div class="text-xs text-muted-foreground max-w-[180px] truncate">Investment submitted for Weekly Pool - Awaiting approval</div>
-                                                </td>
+                                        <tbody class="divide-y divide-border" id="txTableBody">
+                                            <tr id="txTableEmpty">
+                                                <td colspan="6" class="px-4 py-8 text-center text-xs sm:text-sm text-muted-foreground">No transactions yet. Once you make a deposit, it'll show up here.</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -482,5 +402,103 @@
         </div>
     <script src="../scripts/auth-guard.js"></script>
             <script src="../scripts/dashboard-nav.js"></script>
+            <script>
+              (function () {
+                // Empty for now — no real transaction-fetch endpoint exists yet.
+                // Once deposits/withdrawals/returns are wired to a real API,
+                // call window.renderTransactions(realData) with rows shaped
+                // like the objects below, and everything here (filtering,
+                // search, empty states) already works against it.
+                var transactions = [];
+                var currentFilter = 'all';
+                var currentSearch = '';
+
+                var tbody = document.getElementById('txTableBody');
+                var mobileList = document.getElementById('txMobileList');
+                var searchInput = document.getElementById('txSearchInput');
+                var filterButtons = document.querySelectorAll('#txFilterButtons button');
+
+                function typeBadgeClass(type) {
+                  if (type === 'deposit') return 'bg-emerald-500/20 text-emerald-400';
+                  if (type === 'withdraw') return 'bg-red-500/20 text-red-400';
+                  return 'bg-red-500/20 text-red-400'; // return/investment default, matches existing style
+                }
+
+                function render() {
+                  var filtered = transactions.filter(function (tx) {
+                    var matchesFilter = currentFilter === 'all' || tx.type === currentFilter;
+                    var matchesSearch = !currentSearch || tx.id.toLowerCase().indexOf(currentSearch.toLowerCase()) !== -1;
+                    return matchesFilter && matchesSearch;
+                  });
+
+                  if (!filtered.length) {
+                    var emptyMsg = transactions.length
+                      ? 'No transactions match your search or filter.'
+                      : "No transactions yet. Once you make a deposit, it'll show up here.";
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-xs sm:text-sm text-muted-foreground">' + emptyMsg + '</td></tr>';
+                    mobileList.innerHTML = '<div class="bg-card border border-border rounded-lg p-6 text-center text-xs sm:text-sm text-muted-foreground">' + emptyMsg + '</div>';
+                    return;
+                  }
+
+                  tbody.innerHTML = filtered.map(function (tx) {
+                    return '' +
+                      '<tr class="hover:bg-secondary/30 transition-colors cursor-pointer">' +
+                      '<td class="px-4 py-3"><span class="text-xs font-mono text-muted-foreground">' + tx.id + '</span></td>' +
+                      '<td class="px-4 py-3"><div class="text-sm text-foreground">' + tx.date + '</div><div class="text-[10px] text-muted-foreground">' + tx.time + '</div></td>' +
+                      '<td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium ' + typeBadgeClass(tx.type) + '">' + tx.label + '</span></td>' +
+                      '<td class="px-4 py-3 text-right"><div class="text-sm font-medium tabular-nums text-foreground">' + tx.amountDisplay + '</div><div class="text-[10px] text-muted-foreground">' + tx.currency + '</div></td>' +
+                      '<td class="px-4 py-3 text-right"><div class="text-sm font-medium tabular-nums text-foreground">' + tx.netDisplay + '</div></td>' +
+                      '<td class="px-4 py-3"><div class="text-xs text-muted-foreground max-w-[180px] truncate">' + tx.note + '</div></td>' +
+                      '</tr>';
+                  }).join('');
+
+                  mobileList.innerHTML = filtered.map(function (tx) {
+                    return '' +
+                      '<div class="bg-card border border-border rounded-lg p-3 cursor-pointer hover:border-[oklch(0.62_0.12_178)/30] transition-all">' +
+                      '<div class="flex items-center justify-between mb-2">' +
+                      '<span class="text-[10px] sm:text-xs font-mono text-muted-foreground">' + tx.id + '</span>' +
+                      '<span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-medium ' + typeBadgeClass(tx.type) + '">' + tx.label + '</span>' +
+                      '</div>' +
+                      '<div class="flex items-center justify-between">' +
+                      '<div><div class="text-sm sm:text-base font-medium text-foreground"><span>' + tx.amountDisplay + '</span></div>' +
+                      '<div class="text-[10px] text-muted-foreground">' + tx.date + ' • ' + tx.time + '</div></div>' +
+                      '<div class="text-right"><div class="text-xs font-medium text-muted-foreground">Net</div>' +
+                      '<div class="text-sm font-medium text-foreground">' + tx.netDisplay + '</div></div>' +
+                      '</div></div>';
+                  }).join('');
+                }
+
+                filterButtons.forEach(function (btn) {
+                  btn.addEventListener('click', function () {
+                    currentFilter = btn.getAttribute('data-filter');
+                    filterButtons.forEach(function (b) {
+                      var active = b === btn;
+                      b.classList.toggle('bg-primary', active);
+                      b.classList.toggle('text-primary-foreground', active);
+                      b.classList.toggle('bg-secondary', !active);
+                      b.classList.toggle('text-muted-foreground', !active);
+                    });
+                    render();
+                  });
+                });
+
+                searchInput.addEventListener('input', function () {
+                  currentSearch = searchInput.value.trim();
+                  render();
+                });
+
+                window.renderTransactions = function (data) {
+                  transactions = data || [];
+                  render();
+                };
+
+                render();
+
+                fetch('/api/account/summary')
+                  .then(function (res) { if (!res.ok) throw new Error('summary fetch failed: ' + res.status); return res.json(); })
+                  .then(function (data) { window.renderTransactions(data.transactions); })
+                  .catch(function (err) { console.warn('Could not load transactions:', err.message); });
+              })();
+            </script>
             </body>
 </html>

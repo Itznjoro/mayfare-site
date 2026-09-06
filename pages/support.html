@@ -475,7 +475,7 @@
          </h3>
          <div class="space-y-2 sm:space-y-3">
           <div class="overflow-hidden rounded-xl border border-border">
-           <button class="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary/30 sm:p-4">
+           <button class="faq-toggle-btn flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary/30 sm:p-4">
             <span class="text-xs font-medium text-foreground sm:text-sm">
              How do I start investing?
             </span>
@@ -486,7 +486,7 @@
            </button>
           </div>
           <div class="overflow-hidden rounded-xl border border-border">
-           <button class="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary/30 sm:p-4">
+           <button class="faq-toggle-btn flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary/30 sm:p-4">
             <span class="text-xs font-medium text-foreground sm:text-sm">
              What is the minimum investment?
             </span>
@@ -497,7 +497,7 @@
            </button>
           </div>
           <div class="overflow-hidden rounded-xl border border-border">
-           <button class="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary/30 sm:p-4">
+           <button class="faq-toggle-btn flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary/30 sm:p-4">
             <span class="text-xs font-medium text-foreground sm:text-sm">
              How are returns calculated?
             </span>
@@ -508,7 +508,7 @@
            </button>
           </div>
           <div class="overflow-hidden rounded-xl border border-border">
-           <button class="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary/30 sm:p-4">
+           <button class="faq-toggle-btn flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary/30 sm:p-4">
             <span class="text-xs font-medium text-foreground sm:text-sm">
              When do I receive returns?
             </span>
@@ -519,7 +519,7 @@
            </button>
           </div>
           <div class="overflow-hidden rounded-xl border border-border">
-           <button class="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary/30 sm:p-4">
+           <button class="faq-toggle-btn flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary/30 sm:p-4">
             <span class="text-xs font-medium text-foreground sm:text-sm">
              Is my capital guaranteed?
             </span>
@@ -530,7 +530,7 @@
            </button>
           </div>
           <div class="overflow-hidden rounded-xl border border-border">
-           <button class="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary/30 sm:p-4">
+           <button class="faq-toggle-btn flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary/30 sm:p-4">
             <span class="text-xs font-medium text-foreground sm:text-sm">
              How do I withdraw?
             </span>
@@ -623,5 +623,25 @@
   </div>
  <script src="../scripts/auth-guard.js"></script>
             <script src="../scripts/dashboard-nav.js"></script>
+            <script>
+              (function () {
+                var faqButtons = document.querySelectorAll('.faq-toggle-btn');
+                faqButtons.forEach(function (btn) {
+                  var wrapper = btn.parentElement;
+                  var icon = btn.querySelector('svg');
+                  var answer = document.createElement('div');
+                  answer.className = 'px-3 pb-3 text-xs text-muted-foreground sm:px-4 sm:pb-4 sm:text-sm';
+                  answer.textContent = 'Coming soon.';
+                  answer.style.display = 'none';
+                  wrapper.appendChild(answer);
+
+                  btn.addEventListener('click', function () {
+                    var isOpen = answer.style.display !== 'none';
+                    answer.style.display = isOpen ? 'none' : '';
+                    if (icon) icon.style.transform = isOpen ? '' : 'rotate(180deg)';
+                  });
+                });
+              })();
+            </script>
             </body>
 </html>

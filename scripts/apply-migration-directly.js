@@ -13,8 +13,8 @@ const { Pool } = require('pg');
 const envPath = path.join(__dirname, '..', '.env');
 if (fs.existsSync(envPath)) {
   const envContent = fs.readFileSync(envPath, 'utf8');
-  envContent.split('\n').forEach((line) => {
-    const match = line.match(/^([^=#]+)=(.*)$/);
+  envContent.split(/\r?\n/).forEach((line) => {
+    const match = line.trim().match(/^([^=#]+)=(.*)$/);
     if (match) {
       const key = match[1].trim();
       let value = match[2].trim();

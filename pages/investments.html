@@ -300,7 +300,7 @@
                                 <a class="text-xs text-muted-foreground hover:text-foreground" href="./app.html">← Back to Dashboard</a>
                             </div>
                             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
-                                <button class="rounded-lg border bg-card p-3 text-left transition-all hover:bg-secondary/50 sm:p-4 border-border">
+                                <button id="poolBtn48h" data-pool="48h" class="rounded-lg border bg-card p-3 text-left transition-all hover:bg-secondary/50 sm:p-4 border-border">
                                     <div class="mb-2 flex items-start justify-between">
                                         <div>
                                             <div class="text-sm font-medium text-foreground sm:text-base">48H Pool</div>
@@ -309,7 +309,7 @@
                                     </div>
                                     <div class="text-lg font-semibold text-foreground sm:text-xl">10x ROI</div>
                                 </button>
-                                <button class="relative rounded-lg border bg-card p-3 text-left transition-all hover:bg-secondary/50 sm:p-4 border-[var(--color-success)] bg-[var(--bg-success)] ring-2 ring-[var(--color-success)]/35">
+                                <button id="poolBtnWeekly" data-pool="weekly" class="relative rounded-lg border bg-card p-3 text-left transition-all hover:bg-secondary/50 sm:p-4 border-border">
                                     <div class="absolute -top-1.5 right-2 rounded bg-[var(--color-success)] px-1.5 py-0.5 text-[9px] font-medium text-white sm:right-3 sm:px-2 sm:text-[10px]">Popular</div>
                                     <div class="mb-2 flex items-start justify-between">
                                         <div>
@@ -331,14 +331,14 @@
                                             <label class="mb-1.5 block text-xs font-medium text-foreground sm:text-sm">Amount (USD)</label>
                                             <div class="relative">
                                                 <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground sm:left-4">$</span>
-                                                <input inputmode="decimal" min="500" placeholder="500" class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base pl-7 sm:pl-8" type="number" value="">
+                                                <input id="depositAmountInput" inputmode="decimal" min="500" placeholder="500" class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base pl-7 sm:pl-8" type="number" value="">
                                             </div>
                                             <p class="mt-1 text-[10px] text-muted-foreground">Minimum $500</p>
                                         </div>
                                         <div>
                                             <label class="mb-1.5 block text-xs font-medium text-foreground sm:text-sm">Network</label>
                                             <div class="relative">
-                                                <select class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base appearance-none pr-10" aria-label="Deposit network">
+                                                <select id="networkSelect" class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base appearance-none pr-10" aria-label="Deposit network">
                                                     <option value="TRC20">USDT (TRC20) · Tron (TRC20)</option>
                                                     <option value="BTC">Bitcoin (BTC) · Bitcoin</option>
                                                 </select>
@@ -346,38 +346,39 @@
                                                     <polyline points="6 9 12 15 18 9" />
                                                 </svg>
                                             </div>
-                                            <p class="mt-1 text-[10px] text-muted-foreground">Send USDT on Tron (TRC20) only</p>
+                                            <p class="mt-1 text-[10px] text-muted-foreground" id="networkHintText">Send USDT on Tron (TRC20) only</p>
                                         </div>
                                     </div>
+                                    <div id="amountRevealBox" class="rounded-lg border border-border bg-secondary/40 px-3 py-2.5 text-xs text-foreground sm:text-sm" style="display:none;"></div>
                                     <div class="overflow-hidden rounded-xl border border-[var(--color-success)]/30 bg-[var(--bg-success)]">
                                         <div class="flex items-center justify-between gap-2 border-b border-[var(--color-success)]/20 px-3 py-2 sm:px-4">
                                             <div class="flex items-center gap-2">
                                                 <span class="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-success)] text-[10px] font-bold text-white">2</span>
-                                                <span class="text-xs font-medium text-foreground sm:text-sm">Send USDT to this Tron (TRC20) address</span>
+                                                <span class="text-xs font-medium text-foreground sm:text-sm" id="addressInstructionText">Send USDT to this Tron (TRC20) address</span>
                                             </div>
-                                            <span class="rounded-full bg-card px-2 py-0.5 text-[10px] font-semibold text-[var(--color-success)]">USDT (TRC20)</span>
+                                            <span class="rounded-full bg-card px-2 py-0.5 text-[10px] font-semibold text-[var(--color-success)]" id="addressNetworkBadge">USDT (TRC20)</span>
                                         </div>
                                         <div class="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:gap-3 sm:p-4">
-                                            <code class="min-w-0 flex-1 break-all rounded-lg bg-card px-3 py-2.5 font-mono text-[11px] text-foreground sm:text-xs" data-testid="deposit-address">TVJhKNEJqcKwyd2Mdc7hLbVTzUtZPeKcNq</code>
-                                            <button type="button" class="flex shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-xs font-medium transition-all bg-[var(--color-success)] text-white hover:opacity-90">
+                                            <code class="min-w-0 flex-1 break-all rounded-lg bg-card px-3 py-2.5 font-mono text-[11px] text-foreground sm:text-xs" id="depositAddress" data-testid="deposit-address">TVJhKNEJqcKwyd2Mdc7hLbVTzUtZPeKcNq</code>
+                                            <button type="button" id="copyAddressBtn" class="flex shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-xs font-medium transition-all bg-[var(--color-success)] text-white hover:opacity-90">
                                                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                     <rect x="9" y="9" width="13" height="13" rx="2" />
                                                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                                                </svg>Copy address</button>
+                                                </svg><span id="copyAddressBtnText">Copy address</span></button>
                                             </div>
                                             <p class="px-3 pb-3 text-[10px] text-muted-foreground sm:px-4 sm:text-[11px]">
                                                 <span class="font-medium text-foreground">Important:</span> Send USDT on the Tron network only. Other networks will be lost. Send the exact amount — deposits on any other network can't be recovered.</p>
                                                 </div>
                                                 <div>
                                                     <label class="mb-1.5 block text-xs font-medium text-foreground sm:text-sm">Transaction hash</label>
-                                                    <input placeholder="Paste the TRC20 transaction hash after sending" class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base font-mono text-xs sm:text-sm" type="text" value="">
+                                                    <input id="txHashInput" placeholder="Paste the TRC20 transaction hash after sending" class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base font-mono text-xs sm:text-sm" type="text" value="">
                                                 </div>
                                                 <div>
                                                     <label class="mb-1.5 block text-xs font-medium text-foreground sm:text-sm">Notes (optional)</label>
-                                                    <textarea placeholder="Anything the admin should know…" rows="2" class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base resize-none text-xs sm:text-sm">
+                                                    <textarea id="depositNotesInput" placeholder="Anything the admin should know…" rows="2" class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base resize-none text-xs sm:text-sm">
                                                     </textarea>
                                                 </div>
-                                                <button type="button" disabled class="w-full rounded-lg bg-[var(--color-success)] py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:py-3.5 sm:text-base">Submit USDT deposit</button>
+                                                <button type="button" id="submitDepositBtn" disabled class="w-full rounded-lg bg-[var(--color-success)] py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:py-3.5 sm:text-base"><span id="submitDepositBtnText">Select a pool and enter an amount</span></button>
                                             </div>
                                         </div>
                                         <div class="bg-card rounded-xl border border-border/70 elevation-sm p-4 sm:p-6">
@@ -474,5 +475,258 @@
                     </next-route-announcer>
                 <script src="../scripts/auth-guard.js"></script>
             <script src="../scripts/dashboard-nav.js"></script>
+            <script>
+              (function () {
+                var selectedPool = null; // '48h' | 'weekly' — nothing selected until the user clicks one
+                var poolBtn48h = document.getElementById('poolBtn48h');
+                var poolBtnWeekly = document.getElementById('poolBtnWeekly');
+                var amountInput = document.getElementById('depositAmountInput');
+                var amountRevealBox = document.getElementById('amountRevealBox');
+                var networkSelect = document.getElementById('networkSelect');
+                var networkHintText = document.getElementById('networkHintText');
+                var addressEl = document.getElementById('depositAddress');
+                var addressInstructionText = document.getElementById('addressInstructionText');
+                var addressNetworkBadge = document.getElementById('addressNetworkBadge');
+                var copyBtn = document.getElementById('copyAddressBtn');
+                var copyBtnText = document.getElementById('copyAddressBtnText');
+                var submitBtn = document.getElementById('submitDepositBtn');
+                var submitBtnText = document.getElementById('submitDepositBtnText');
+                var txHashInput = document.getElementById('txHashInput');
+                var notesInput = document.getElementById('depositNotesInput');
+
+                if (!poolBtn48h) return; // not on this page's markup for some reason — bail safely
+
+                var poolButtons = [poolBtn48h, poolBtnWeekly];
+
+                function selectPool(pool, btn) {
+                  selectedPool = pool;
+                  poolButtons.forEach(function (b) {
+                    var active = b === btn;
+                    b.classList.toggle('border-[var(--color-success)]', active);
+                    b.classList.toggle('bg-[var(--bg-success)]', active);
+                    b.classList.toggle('ring-2', active);
+                    b.classList.toggle('ring-[var(--color-success)]/35', active);
+                    b.classList.toggle('border-border', !active);
+                  });
+                  validateForm();
+                }
+                poolBtn48h.addEventListener('click', function () { selectPool('48h', poolBtn48h); });
+                poolBtnWeekly.addEventListener('click', function () { selectPool('weekly', poolBtnWeekly); });
+
+                // Placeholder addresses only — real per-network deposit addresses
+                // still need to be wired up separately.
+                function randomBase58(len) {
+                  var chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+                  var out = '';
+                  for (var i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
+                  return out;
+                }
+                var addresses = {
+                  TRC20: 'T' + randomBase58(33),
+                  BTC: '1' + randomBase58(33),
+                };
+
+                function updateNetworkUI() {
+                  var network = networkSelect.value;
+                  addressEl.textContent = addresses[network];
+                  if (network === 'BTC') {
+                    addressInstructionText.textContent = 'Send BTC to this Bitcoin address';
+                    addressNetworkBadge.textContent = 'BTC';
+                    networkHintText.textContent = 'Send BTC on the Bitcoin network only';
+                    submitBtnText.textContent = selectedPool ? 'Submit BTC deposit' : 'Select a pool and enter an amount';
+                  } else {
+                    addressInstructionText.textContent = 'Send USDT to this Tron (TRC20) address';
+                    addressNetworkBadge.textContent = 'USDT (TRC20)';
+                    networkHintText.textContent = 'Send USDT on Tron (TRC20) only';
+                    submitBtnText.textContent = selectedPool ? 'Submit USDT deposit' : 'Select a pool and enter an amount';
+                  }
+                  copyBtn.disabled = false;
+                }
+                networkSelect.addEventListener('change', updateNetworkUI);
+                updateNetworkUI();
+
+                copyBtn.addEventListener('click', function () {
+                  var original = copyBtnText.textContent;
+                  function showCopied(text) {
+                    copyBtnText.textContent = text;
+                    setTimeout(function () { copyBtnText.textContent = original; }, 1500);
+                  }
+                  if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(addressEl.textContent)
+                      .then(function () { showCopied('Copied!'); })
+                      .catch(function () { showCopied('Copy manually — see above'); });
+                  } else {
+                    showCopied('Copy manually — see above');
+                  }
+                });
+
+                amountInput.addEventListener('input', function () {
+                  var val = parseFloat(amountInput.value);
+                  if (val && val > 0) {
+                    amountRevealBox.style.display = '';
+                    var networkLabel = networkSelect.value === 'BTC' ? 'Bitcoin' : 'USDT (TRC20)';
+                    amountRevealBox.textContent = 'Depositing $' + val.toLocaleString() + ' via ' + networkLabel + '.';
+                  } else {
+                    amountRevealBox.style.display = 'none';
+                  }
+                  validateForm();
+                });
+
+                function validateForm() {
+                  var amount = parseFloat(amountInput.value);
+                  var valid = !!selectedPool && amount >= 500;
+                  submitBtn.disabled = !valid;
+                  if (valid) {
+                    submitBtnText.textContent = networkSelect.value === 'BTC' ? 'Submit BTC deposit' : 'Submit USDT deposit';
+                  } else if (!selectedPool) {
+                    submitBtnText.textContent = 'Select a pool and enter an amount';
+                  } else {
+                    submitBtnText.textContent = 'Enter at least $500';
+                  }
+                }
+
+                submitBtn.addEventListener('click', async function () {
+                  if (submitBtn.disabled) return;
+                  var amount = amountInput.value;
+                  var networkLabel = networkSelect.value === 'BTC' ? 'Bitcoin (BTC)' : 'USDT (TRC20)';
+                  var address = addressEl.textContent;
+                  var poolLabel = (selectedPool === '48h' ? '48H Pool' : 'Weekly Pool') + ' (10x ROI)';
+                  var hash = txHashInput.value.trim();
+
+                  submitBtn.disabled = true;
+                  var originalSubmitText = submitBtnText.textContent;
+                  submitBtnText.textContent = 'Submitting…';
+
+                  var refId;
+                  try {
+                    var res = await fetch('/api/deposits/create', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        amount: amount,
+                        currency: networkSelect.value,
+                        txReference: hash || null,
+                      }),
+                    });
+                    var data = await res.json();
+                    if (!res.ok) throw new Error(data.error || 'Could not submit deposit request.');
+                    refId = data.deposit.id; // the REAL database ID, not a placeholder
+                  } catch (err) {
+                    alert("Couldn't save your deposit request: " + err.message + '\nPlease try again, or contact support if this continues.');
+                    submitBtn.disabled = false;
+                    submitBtnText.textContent = originalSubmitText;
+                    return;
+                  }
+
+                  var lines = [
+                    '*New Stake Request*',
+                    '*Plan:* ' + poolLabel,
+                    '*Amount:* $' + amount,
+                    '*Network:* ' + networkLabel,
+                    '*Deposit address:* ' + address,
+                  ];
+                  if (hash) lines.push('*TX Hash:* ' + hash);
+                  lines.push('*Ref ID:* ' + refId);
+                  var message = lines.join('\n');
+
+                  submitBtn.disabled = false;
+                  submitBtnText.textContent = originalSubmitText;
+                  showDepositFallback(message);
+                });
+
+                // Always shows the exact message that will be sent, with a working
+                // manual-copy button — this way copying never silently fails on the
+                // user, even if the automatic clipboard write doesn't work in their
+                // browser (which can happen for reasons outside our control: focus
+                // loss, permissions, embedded browsers, etc).
+                function showDepositFallback(message) {
+                  var overlay = document.createElement('div');
+                  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+
+                  var box = document.createElement('div');
+                  box.style.cssText = 'background:var(--card);border-radius:12px;padding:20px;max-width:420px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.3);';
+
+                  var title = document.createElement('div');
+                  title.textContent = 'Deposit request ready';
+                  title.style.cssText = 'font-weight:600;font-size:14px;margin-bottom:8px;color:var(--foreground);';
+
+                  var subtitle = document.createElement('div');
+                  subtitle.id = 'depositFallbackStatus';
+                  subtitle.textContent = 'Copying automatically…';
+                  subtitle.style.cssText = 'font-size:12px;color:var(--muted-foreground);margin-bottom:12px;';
+
+                  var textarea = document.createElement('textarea');
+                  textarea.id = 'depositFallbackTextarea';
+                  textarea.readOnly = true;
+                  textarea.value = message;
+                  textarea.style.cssText = 'width:100%;height:140px;font-family:monospace;font-size:11px;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);resize:none;margin-bottom:12px;';
+
+                  var btnRow = document.createElement('div');
+                  btnRow.style.cssText = 'display:flex;gap:8px;';
+
+                  var copyManualBtn = document.createElement('button');
+                  copyManualBtn.textContent = 'Copy text';
+                  copyManualBtn.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);font-size:13px;cursor:pointer;';
+
+                  var continueBtn = document.createElement('button');
+                  continueBtn.textContent = 'Continue to Telegram';
+                  continueBtn.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:none;background:var(--color-success);color:white;font-size:13px;font-weight:600;cursor:pointer;';
+
+                  btnRow.appendChild(copyManualBtn);
+                  btnRow.appendChild(continueBtn);
+                  box.appendChild(title);
+                  box.appendChild(subtitle);
+                  box.appendChild(textarea);
+                  box.appendChild(btnRow);
+                  overlay.appendChild(box);
+                  document.body.appendChild(overlay);
+
+                  function manualCopy() {
+                    textarea.focus();
+                    textarea.select();
+                    try {
+                      document.execCommand('copy');
+                      copyManualBtn.textContent = 'Copied!';
+                    } catch (e) {
+                      copyManualBtn.textContent = 'Select all + Ctrl/Cmd+C';
+                    }
+                  }
+                  copyManualBtn.addEventListener('click', manualCopy);
+
+                  continueBtn.addEventListener('click', function () {
+                    document.body.removeChild(overlay);
+                    // t.me/share/url reliably pre-fills the message compose box —
+                    // unlike a plain t.me/username link, which can't auto-fill text
+                    // for a regular (non-Business) Telegram account. The one small
+                    // tradeoff: Telegram will ask which chat to send it to, since
+                    // the share link doesn't pre-select a specific contact — from
+                    // there it's one tap to pick the chat, then Send.
+                    var shareUrl = 'https://t.me/share/url?text=' + encodeURIComponent(message);
+                    window.open(shareUrl, '_blank');
+                  });
+
+                  // Try the automatic clipboard write too — if it works, great, the
+                  // text is already on the clipboard and the manual button is just
+                  // a backup. If it fails, we tell the user plainly instead of
+                  // pretending it worked.
+                  if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(message)
+                      .then(function () {
+                        document.getElementById('depositFallbackStatus').textContent =
+                          'Copied automatically — just paste it into Telegram.';
+                      })
+                      .catch(function (err) {
+                        console.warn('Automatic clipboard copy failed:', err.message);
+                        document.getElementById('depositFallbackStatus').textContent =
+                          "Couldn't copy automatically — use the \"Copy text\" button below.";
+                      });
+                  } else {
+                    subtitle.textContent = 'Use the "Copy text" button below, then send it in Telegram.';
+                  }
+                }
+
+                validateForm();
+              })();
+            </script>
             </body>
             </html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login — Mayfare Forex Company</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" href="../favicon.svg" />
+</head>
+<body>
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--secondary); padding:1.5rem;">
+    <div style="width:100%; max-width:24rem; background:var(--card); border-radius:1rem; padding:2rem; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div class="brand" style="margin-bottom:1.5rem;">
+        <span class="brand-name">Mayfare Forex Company</span>
+      </div>
+      <h1 style="font-size:1.25rem; font-weight:700; margin-bottom:0.25rem; color:var(--foreground);">Admin sign in</h1>
+      <p style="font-size:0.8125rem; color:var(--muted-foreground); margin-bottom:1.5rem;">Restricted access — admin accounts only.</p>
+
+      <form class="auth-form" id="adminLoginForm">
+        <div class="auth-error" id="authError" style="display:none;"></div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="admin@example.com" required value="" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="••••••••" required value="" />
+        </div>
+        <button type="submit" class="btn-auth">Sign in</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    var form = document.getElementById('adminLoginForm');
+    var errorBox = document.getElementById('authError');
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var submitDefaultText = submitBtn.textContent;
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.style.display = 'block';
+    }
+    function hideError() { errorBox.style.display = 'none'; }
+    function setLoading(isLoading) {
+      submitBtn.disabled = isLoading;
+      submitBtn.textContent = isLoading ? 'Signing in…' : submitDefaultText;
+    }
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      hideError();
+      setLoading(true);
+
+      var email = form.email.value.trim();
+      var password = form.password.value;
+
+      try {
+        var res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, password: password }),
+        });
+        var data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error || 'Something went wrong. Please try again.');
+          setLoading(false);
+          return;
+        }
+
+        window.location.href = 'deposits.html';
+      } catch (err) {
+        showError('Could not reach the server. Please check your connection and try again.');
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>

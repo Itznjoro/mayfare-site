@@ -125,12 +125,31 @@ export async function resetFailedLogins(userId: string) {
 // ---- Shared shape for what we send back to the client ----
 // Never include passwordHash, failedLoginAttempts, etc.
 
-export function publicUser(user: { id: string; email: string; fullName: string; telegram: string | null; createdAt: Date }) {
+export function publicUser(user: { id: string; email: string; fullName: string; telegram: string | null; role: string; createdAt: Date }) {
   return {
     id: user.id,
     email: user.email,
     fullName: user.fullName,
     telegram: user.telegram,
+    role: user.role,
     createdAt: user.createdAt,
   };
+}
+
+/**
+ * Use at the top of any admin-only API route:
+ *   const admin = await requireAdmin(req, res);
+ *   if (!admin) return; // requireAdmin already sent the 401/403 response
+ */
+export async function requireAdmin(req: VercelRequest, res: VercelResponse) {
+  const user = await getUserFromRequest(req);
+  if (!user) {
+    res.status(401).json({ error: 'Not authenticated.' });
+    return null;
+  }
+  if (user.role !== 'admin') {
+    res.status(403).json({ error: 'Not authorized.' });
+    return null;
+  }
+  return user;
 }

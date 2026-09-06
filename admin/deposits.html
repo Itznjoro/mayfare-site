@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Deposits — Mayfare Forex Company</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" href="../favicon.svg" />
+  <style>
+    .admin-wrap { max-width: 72rem; margin: 0 auto; padding: 1.5rem; }
+    .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .admin-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .admin-tab { padding: 0.5rem 0.875rem; border-radius: 0.5rem; font-size: 0.8125rem; font-weight: 500; border: 1px solid var(--border); background: var(--card); color: var(--muted-foreground); cursor: pointer; }
+    .admin-tab.active { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
+    .admin-table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 0.75rem; overflow: hidden; border: 1px solid var(--border); }
+    .admin-table th { text-align: left; font-size: 0.6875rem; text-transform: uppercase; color: var(--muted-foreground); padding: 0.75rem 1rem; background: var(--secondary); }
+    .admin-table td { padding: 0.75rem 1rem; font-size: 0.8125rem; border-top: 1px solid var(--border); color: var(--foreground); vertical-align: top; }
+    .admin-badge { display: inline-block; padding: 0.125rem 0.5rem; border-radius: 0.375rem; font-size: 0.6875rem; font-weight: 600; }
+    .admin-badge.pending { background: #fef3c7; color: #92400e; }
+    .admin-badge.approved { background: #d1fae5; color: #065f46; }
+    .admin-badge.rejected { background: #fee2e2; color: #991b1b; }
+    .admin-btn { padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 600; border: none; cursor: pointer; margin-right: 0.375rem; }
+    .admin-btn.approve { background: #059669; color: white; }
+    .admin-btn.reject { background: #dc2626; color: white; }
+    .admin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .admin-empty { text-align: center; padding: 3rem 1rem; color: var(--muted-foreground); font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <div class="admin-wrap">
+    <div class="admin-header">
+      <div class="brand">
+        <span class="brand-name">Mayfare Forex Company</span>
+        <span style="font-size:0.75rem; color:var(--muted-foreground); margin-left:0.5rem;">Admin</span>
+      </div>
+      <button id="logoutBtn" style="font-size:0.8125rem; color:var(--muted-foreground); background:none; border:none; cursor:pointer;">Sign out</button>
+    </div>
+
+    <h1 style="font-size:1.5rem; font-weight:700; margin-bottom:1rem; color:var(--foreground);">Deposits</h1>
+
+    <div class="admin-tabs" id="statusTabs">
+      <button class="admin-tab active" data-status="pending">Pending</button>
+      <button class="admin-tab" data-status="approved">Approved</button>
+      <button class="admin-tab" data-status="rejected">Rejected</button>
+      <button class="admin-tab" data-status="">All</button>
+    </div>
+
+    <div id="depositsContainer">
+      <div class="admin-empty">Loading…</div>
+    </div>
+  </div>
+
+  <script>
+    var currentStatus = 'pending';
+    var container = document.getElementById('depositsContainer');
+    var tabs = document.querySelectorAll('.admin-tab');
+
+    function fmtMoney(amount, currency) {
+      return '$' + parseFloat(amount).toLocaleString() + ' ' + currency;
+    }
+    function fmtDate(iso) {
+      return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+        ' · ' + new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+
+    async function loadDeposits() {
+      container.innerHTML = '<div class="admin-empty">Loading…</div>';
+      var url = '/api/admin/deposits' + (currentStatus ? '?status=' + currentStatus : '');
+      try {
+        var res = await fetch(url);
+        if (res.status === 401 || res.status === 403) {
+          window.location.href = 'login.html';
+          return;
+        }
+        var data = await res.json();
+        renderDeposits(data.deposits || []);
+      } catch (err) {
+        container.innerHTML = '<div class="admin-empty">Could not load deposits: ' + err.message + '</div>';
+      }
+    }
+
+    function renderDeposits(deposits) {
+      if (!deposits.length) {
+        container.innerHTML = '<div class="admin-empty">No deposits here yet.</div>';
+        return;
+      }
+
+      var rows = deposits.map(function (d) {
+        var actions = d.status === 'pending'
+          ? '<button class="admin-btn approve" data-id="' + d.id + '" data-action="approve">Approve</button>' +
+            '<button class="admin-btn reject" data-id="' + d.id + '" data-action="reject">Reject</button>'
+          : '<span style="color:var(--muted-foreground); font-size:0.75rem;">' +
+            (d.reviewedAt ? 'Reviewed ' + fmtDate(d.reviewedAt) : '—') + '</span>';
+
+        return '' +
+          '<tr>' +
+          '<td>' + d.userFullName + '<br><span style="color:var(--muted-foreground); font-size:0.75rem;">' + d.userEmail + '</span></td>' +
+          '<td>' + fmtMoney(d.amount, d.currency) + '</td>' +
+          '<td><span class="admin-badge ' + d.status + '">' + d.status + '</span></td>' +
+          '<td style="max-width:12rem; overflow-wrap:anywhere; font-family:monospace; font-size:0.75rem;">' + (d.txReference || '—') + '</td>' +
+          '<td>' + fmtDate(d.createdAt) + '</td>' +
+          '<td>' + actions + '</td>' +
+          '</tr>';
+      }).join('');
+
+      container.innerHTML =
+        '<table class="admin-table">' +
+        '<thead><tr><th>User</th><th>Amount</th><th>Status</th><th>Tx Reference</th><th>Submitted</th><th>Action</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+        '</table>';
+
+      container.querySelectorAll('.admin-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () { handleAction(btn); });
+      });
+    }
+
+    async function handleAction(btn) {
+      var id = btn.getAttribute('data-id');
+      var action = btn.getAttribute('data-action');
+      var row = btn.closest('tr');
+      row.querySelectorAll('.admin-btn').forEach(function (b) { b.disabled = true; });
+
+      var body = {};
+      if (action === 'reject') {
+        var note = prompt('Optional note for this rejection:');
+        if (note) body.adminNote = note;
+      }
+
+      try {
+        var res = await fetch('/api/admin/deposits/' + id + '/' + action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        var data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Action failed.');
+          row.querySelectorAll('.admin-btn').forEach(function (b) { b.disabled = false; });
+          return;
+        }
+        loadDeposits();
+      } catch (err) {
+        alert('Could not reach the server: ' + err.message);
+        row.querySelectorAll('.admin-btn').forEach(function (b) { b.disabled = false; });
+      }
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        currentStatus = tab.getAttribute('data-status');
+        tabs.forEach(function (t) { t.classList.toggle('active', t === tab); });
+        loadDeposits();
+      });
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async function () {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+
+    loadDeposits();
+  </script>
+</body>
+</html>
