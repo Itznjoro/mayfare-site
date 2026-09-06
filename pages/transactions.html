@@ -288,15 +288,15 @@
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
                                 <div class="bg-card rounded-xl border border-border/70 elevation-sm p-3 sm:p-4">
                                     <div class="text-[10px] sm:text-[11px] text-muted-foreground uppercase font-mono mb-1">Deposits</div>
-                                    <div class="text-sm sm:text-lg font-medium text-foreground">$0</div>
+                                    <div class="text-sm sm:text-lg font-medium text-foreground" id="txSummaryDeposits">$0</div>
                                 </div>
                                 <div class="bg-card rounded-xl border border-border/70 elevation-sm p-3 sm:p-4">
                                     <div class="text-[10px] sm:text-[11px] text-muted-foreground uppercase font-mono mb-1">Returns</div>
-                                    <div class="text-sm sm:text-lg font-medium text-[var(--color-success)]">+$0</div>
+                                    <div class="text-sm sm:text-lg font-medium text-[var(--color-success)]" id="txSummaryReturns">+$0</div>
                                 </div>
                                 <div class="bg-card rounded-xl border border-border/70 elevation-sm p-3 sm:p-4">
                                     <div class="text-[10px] sm:text-[11px] text-muted-foreground uppercase font-mono mb-1">Withdrawals</div>
-                                    <div class="text-sm sm:text-lg font-medium text-foreground">-$0</div>
+                                    <div class="text-sm sm:text-lg font-medium text-foreground" id="txSummaryWithdrawals">-$0</div>
                                 </div>
                                 <div class="bg-card rounded-xl border border-border/70 elevation-sm p-3 sm:p-4">
                                     <div class="text-[10px] sm:text-[11px] text-muted-foreground uppercase font-mono mb-1">Tax Paid</div>
@@ -496,7 +496,16 @@
 
                 fetch('/api/account/summary')
                   .then(function (res) { if (!res.ok) throw new Error('summary fetch failed: ' + res.status); return res.json(); })
-                  .then(function (data) { window.renderTransactions(data.transactions); })
+                  .then(function (data) {
+                    window.renderTransactions(data.transactions);
+
+                    var depositsEl = document.getElementById('txSummaryDeposits');
+                    var returnsEl = document.getElementById('txSummaryReturns');
+                    var withdrawalsEl = document.getElementById('txSummaryWithdrawals');
+                    if (depositsEl) depositsEl.textContent = '$' + data.totalDeposited.toLocaleString();
+                    if (returnsEl) returnsEl.textContent = '+$' + data.totalRealizedPnl.toLocaleString();
+                    if (withdrawalsEl) withdrawalsEl.textContent = '-$' + data.totalWithdrawn.toLocaleString();
+                  })
                   .catch(function (err) { console.warn('Could not load transactions:', err.message); });
               })();
             </script>

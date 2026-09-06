@@ -63,6 +63,21 @@
       // No Telegram on file — hide the row rather than show a broken/fake link.
       telegramLink.style.display = 'none';
     }
+
+    // Deposited / Returns stat tiles — real data from the same ledger-backed
+    // endpoint the dashboard uses. Active/Completed (trade counts) stay at
+    // their default 0 until trading_valuations has real MT5 data in it.
+    var depositedEl = document.getElementById('profileStatDeposited');
+    var returnsEl = document.getElementById('profileStatReturns');
+    if (depositedEl || returnsEl) {
+      fetch('/api/account/summary')
+        .then(function (res) { if (!res.ok) throw new Error('summary fetch failed: ' + res.status); return res.json(); })
+        .then(function (data) {
+          if (depositedEl) depositedEl.textContent = '$' + data.totalDeposited.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          if (returnsEl) returnsEl.textContent = '$' + data.totalRealizedPnl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        })
+        .catch(function (err) { console.warn('Could not load profile stats:', err.message); });
+    }
   }
 
   fetch('/api/auth/me')
