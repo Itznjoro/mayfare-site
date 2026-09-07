@@ -628,32 +628,55 @@
                   if (notice) notice.style.display = 'none';
                 }
 
+                var dashboardPollInFlight = false;
+
                 function pollDashboard() {
-                  // Load the approved-deposit summary first. This makes the Trade
-                  // field update immediately after approval even when no DEMO exists.
-                  fetch('/api/account/summary', { cache: 'no-store' })
+                  // Do not reset the dashboard to the ordinary account values before
+                  // applying an active DEMO. That caused a visible flicker every 2.5s:
+                  // summary -> DEMO -> summary -> DEMO. Fetch the DEMO state first,
+                  // then paint the dashboard only once per polling cycle.
+                  if (dashboardPollInFlight) return;
+                  dashboardPollInFlight = true;
+
+                  fetch('/api/account/demo', { cache: 'no-store' })
                     .then(function (res) {
-                      if (!res.ok) throw new Error('summary fetch failed: ' + res.status);
+                      if (!res.ok) throw new Error('demo fetch failed: ' + res.status);
                       return res.json();
                     })
-                    .then(function (summary) {
-                      applySummaryData(summary);
-                      hideDemoNotice();
+                    .then(function (demo) {
+                      if (demo && demo.active) {
+                        // While DEMO is active, fetch the approved-deposit total only
+                        // for the Trade field. Do not call applySummaryData(), because
+                        // that would temporarily overwrite the live DEMO values.
+                        return fetch('/api/account/summary', { cache: 'no-store' })
+                          .then(function (res) {
+                            if (!res.ok) throw new Error('summary fetch failed: ' + res.status);
+                            return res.json();
+                          })
+                          .then(function (summary) {
+                            setDemoData(demo, summary);
+                            hideDemoNotice();
+                            if (window.renderRecents) window.renderRecents(summary.transactions || []);
+                          });
+                      }
 
-                      // DEMO is layered on top only when an active simulation exists.
-                      return fetch('/api/account/demo', { cache: 'no-store' })
+                      // No active DEMO: the approved-deposit summary is the source of
+                      // truth for Total Assets, Trade and the initial portfolio state.
+                      return fetch('/api/account/summary', { cache: 'no-store' })
                         .then(function (res) {
-                          if (!res.ok) throw new Error('demo fetch failed: ' + res.status);
+                          if (!res.ok) throw new Error('summary fetch failed: ' + res.status);
                           return res.json();
                         })
-                        .then(function (demo) {
-                          if (demo && demo.active) {
-                            setDemoData(demo, summary);
-                          }
+                        .then(function (summary) {
+                          applySummaryData(summary);
+                          hideDemoNotice();
                         });
                     })
                     .catch(function (err) {
                       console.warn('Could not load dashboard data:', err.message);
+                    })
+                    .finally(function () {
+                      dashboardPollInFlight = false;
                     });
                 }
 
