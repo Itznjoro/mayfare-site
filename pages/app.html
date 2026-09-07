@@ -234,7 +234,7 @@
                       </svg>
                     </div>
                   </div>
-                  <div class="text-[11px] sm:text-[12px] text-muted-foreground mb-1 font-medium">traded</div>
+                  <div class="text-[11px] sm:text-[12px] text-muted-foreground mb-1 font-medium">Trade</div>
                   <div class="text-lg sm:text-xl font-medium tabular-nums text-foreground" id="statTraded">$0.00</div>
                 </div>
                 <div class="bg-card rounded-xl border border-border/70 elevation-sm p-3 sm:p-5 animate-fade-up" style="animation-delay: 140ms;">
@@ -556,11 +556,54 @@
                 function fmtMoney(v) {
                   return '$' + Math.abs(Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 }
-                function setDemoData(data) {
+                function applySummaryData(data) {
+                  if (!data) return;
+                  var balance = Number(data.balance) || 0;
+                  var traded = Number(data.totalDeposited) || 0;
+                  var realized = Number(data.totalRealizedPnl) || 0;
+
+                  // An approved deposit is immediately the user's Trade amount.
+                  // Until a DEMO cycle is started, Total Assets is the real
+                  // approved balance and the portfolio starts from that balance.
+                  document.getElementById('statTotalAssets').textContent = fmtMoney(balance);
+                  document.getElementById('statTraded').textContent = fmtMoney(traded);
+                  document.getElementById('statPendingReturns').textContent = '$0.00';
+                  document.getElementById('statTotalProfit').textContent = fmtMoney(realized);
+
+                  var cycleCurrent = document.getElementById('cycleCurrentAmount');
+                  var cycleTarget = document.getElementById('cycleTargetAmount');
+                  var cycleBar = document.getElementById('cycleProgressBar');
+                  var cycleText = document.getElementById('cycleProgressText');
+                  if (cycleCurrent) cycleCurrent.textContent = fmtMoney(balance);
+                  if (cycleTarget) cycleTarget.textContent = '$0.00';
+                  if (cycleBar) cycleBar.style.width = '0%';
+                  if (cycleText) cycleText.textContent = '0% Complete';
+
+                  var portfolioCurrent = document.getElementById('portfolioCurrent');
+                  var portfolioProfit = document.getElementById('portfolioProfit');
+                  var portfolioPayout = document.getElementById('portfolioPayout');
+                  if (portfolioCurrent) portfolioCurrent.textContent = fmtMoney(balance);
+                  if (portfolioProfit) portfolioProfit.textContent = (realized >= 0 ? '+' : '-') + fmtMoney(realized).replace('$','');
+                  if (portfolioPayout) portfolioPayout.textContent = fmtMoney(Math.max(balance - traded, 0));
+
+                  // Give the portfolio chart a real approved-deposit baseline so
+                  // the dashboard is populated before DEMO trading begins.
+                  if (window.renderPortfolioChart) {
+                    if (traded > 0) {
+                      window.renderPortfolioChart([{ x: 0, value: traded }], { entryValue: traded });
+                    } else {
+                      window.renderPortfolioChart([], {});
+                    }
+                  }
+
+                  if (window.renderRecents) window.renderRecents(data.transactions || []);
+                }
+
+                function setDemoData(data, summary) {
                   if (!data || !data.active) return;
                   var current = Number(data.currentAmount) || 0;
-                  var traded = Number(data.startingAmount) || 0;
-                  var profit = Number(data.profit) || 0;
+                  var traded = summary ? Number(summary.totalDeposited) || 0 : Number(data.startingAmount) || 0;
+                  var profit = current - traded;
                   var pending = Number(data.pendingReturn) || 0;
                   var target = Number(data.targetAmount) || 0;
                   var pct = Math.min(100, Math.max(0, Number(data.progressPercent) || 0));
@@ -574,59 +617,49 @@
                   document.getElementById('cycleProgressText').textContent = pct.toFixed(1) + '% Complete';
                   document.getElementById('portfolioCurrent').textContent = fmtMoney(current);
                   document.getElementById('portfolioProfit').textContent = (profit >= 0 ? '+' : '-') + fmtMoney(profit).replace('$','');
-                  document.getElementById('portfolioPayout').textContent = fmtMoney(current - traded);
+                  document.getElementById('portfolioPayout').textContent = fmtMoney(Math.max(current - traded, 0));
                   window.renderPortfolioChart(data.chartPoints || [], { entryValue: traded });
                   var notice = document.getElementById('demoSimulationNotice');
                   if (notice) notice.style.display = '';
                 }
 
-                function pollDemo() {
-                  fetch('/api/account/demo', { cache: 'no-store' })
-                    .then(function (res) { if (!res.ok) throw new Error('demo fetch failed: ' + res.status); return res.json(); })
-                    .then(function (data) {
-                      if (data.active) {
-                        setDemoData(data);
-                        // Keep the underlying approved-deposit totals synchronized too.
-                        fetch('/api/account/summary', { cache: 'no-store' })
-                          .then(function (res) { return res.ok ? res.json() : null; })
-                          .then(function (summary) {
-                            if (!summary) return;
-                            // The DEMO value remains the visible Total Assets; the
-                            // approved-deposit total is the source for Traded.
-                            document.getElementById('statTraded').textContent = fmtMoney(summary.totalDeposited);
-                            if (window.renderRecents) window.renderRecents(summary.transactions);
-                          }).catch(function () {});
-                      } else {
-                        fetch('/api/account/summary', { cache: 'no-store' })
-                          .then(function (res) { return res.json(); })
-                          .then(function (data) {
-                            document.getElementById('statTotalAssets').textContent = fmtMoney(data.balance);
-                            document.getElementById('statTraded').textContent = fmtMoney(data.totalDeposited);
-                            document.getElementById('statPendingReturns').textContent = '$0.00';
-                            document.getElementById('statTotalProfit').textContent = fmtMoney(data.totalRealizedPnl);
-                            if (window.renderRecents) window.renderRecents(data.transactions);
-                          }).catch(function () {});
-                      }
-                    })
-                    .catch(function (err) { console.warn('Could not load DEMO simulation:', err.message); });
+                function hideDemoNotice() {
+                  var notice = document.getElementById('demoSimulationNotice');
+                  if (notice) notice.style.display = 'none';
                 }
-                pollDemo();
-                setInterval(pollDemo, 2500);
-                fetch('/api/account/summary', { cache: 'no-store' })
-                  .then(function (res) {
-                    if (!res.ok) throw new Error('summary fetch failed: ' + res.status);
-                    return res.json();
-                  })
-                  .then(function (data) {
-                    // Always show the approved real ledger balance first.
-                    // An active DEMO cycle will override these values on its next poll.
-                    document.getElementById('statTotalAssets').textContent = fmtMoney(data.balance);
-                    document.getElementById('statTraded').textContent = fmtMoney(data.totalDeposited);
-                    document.getElementById('statPendingReturns').textContent = '$0.00';
-                    document.getElementById('statTotalProfit').textContent = fmtMoney(data.totalRealizedPnl);
-                    if (window.renderRecents) window.renderRecents(data.transactions);
-                  })
-                  .catch(function (err) { console.warn('Could not load account summary:', err.message); });
+
+                function pollDashboard() {
+                  // Load the approved-deposit summary first. This makes the Trade
+                  // field update immediately after approval even when no DEMO exists.
+                  fetch('/api/account/summary', { cache: 'no-store' })
+                    .then(function (res) {
+                      if (!res.ok) throw new Error('summary fetch failed: ' + res.status);
+                      return res.json();
+                    })
+                    .then(function (summary) {
+                      applySummaryData(summary);
+                      hideDemoNotice();
+
+                      // DEMO is layered on top only when an active simulation exists.
+                      return fetch('/api/account/demo', { cache: 'no-store' })
+                        .then(function (res) {
+                          if (!res.ok) throw new Error('demo fetch failed: ' + res.status);
+                          return res.json();
+                        })
+                        .then(function (demo) {
+                          if (demo && demo.active) {
+                            setDemoData(demo, summary);
+                          }
+                        });
+                    })
+                    .catch(function (err) {
+                      console.warn('Could not load dashboard data:', err.message);
+                    });
+                }
+
+                pollDashboard();
+                setInterval(pollDashboard, 2500);
+              })();
             </script>
             </body>
     </html>
