@@ -1,9 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { db } from '../../../../lib/db';
-import { deposits } from '../../../../db/schema';
+import { accountLedger, deposits } from '../../../../db/schema';
 import { requireAdmin } from '../../../../lib/auth';
-import { addLedgerEntry } from '../../../../lib/ledger';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -27,27 +26,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'This deposit has already been reviewed.' });
   }
 
-  const [updated] = await db
-    .update(deposits)
-    .set({
-      status: 'approved',
-      reviewedBy: admin.id,
-      reviewedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(deposits.id, id))
-    .returning();
+  // Approving a deposit and crediting the ledger must succeed together.
+  // If either operation fails, the transaction rolls both back so an
+  // approved deposit can never be left without a dashboard balance.
+  try {
+    const result = await db.transaction(async (tx) => {
+      const [updated] = await tx
+        .update(deposits)
+        .set({
+          status: 'approved',
+          reviewedBy: admin.id,
+          reviewedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(deposits.id, id))
+        .returning();
 
-  // This is the moment the user's real balance actually increases —
-  // deliberately only ever triggered by an explicit admin approval, never
-  // automatically from the deposit submission itself.
-  await addLedgerEntry({
-    userId: deposit.userId,
-    type: 'deposit',
-    amount: parseFloat(deposit.amount),
-    referenceTable: 'deposits',
-    referenceId: deposit.id,
-  });
+      const current = await tx
+        .select({ balanceAfter: accountLedger.balanceAfter })
+        .from(accountLedger)
+        .where(eq(accountLedger.userId, deposit.userId))
+        .orderBy(desc(accountLedger.createdAt))
+        .limit(1);
+      const currentBalance = current[0] ? parseFloat(current[0].balanceAfter) : 0;
+      const amount = parseFloat(deposit.amount);
+      const newBalance = currentBalance + amount;
 
-  return res.status(200).json({ deposit: updated });
+      await tx.insert(accountLedger).values({
+        userId: deposit.userId,
+        type: 'deposit',
+        amount: amount.toString(),
+        referenceTable: 'deposits',
+        referenceId: deposit.id,
+        balanceAfter: newBalance.toString(),
+      });
+
+      return updated;
+    });
+
+    return res.status(200).json({ deposit: result });
+  } catch (error) {
+    console.error('Deposit approval failed:', error);
+    return res.status(500).json({ error: 'Could not approve the deposit and update the user balance.' });
+  }
 }

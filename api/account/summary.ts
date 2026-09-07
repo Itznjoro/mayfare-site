@@ -20,8 +20,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .select()
     .from(accountLedger)
     .where(eq(accountLedger.userId, user.id))
-    .orderBy(desc(accountLedger.createdAt))
-    .limit(100);
+    .orderBy(desc(accountLedger.createdAt));
+
+  const recentEntries = entries.slice(0, 100);
 
   const totalDeposited = entries
     .filter((e: typeof entries[number]) => e.type === 'deposit')
@@ -37,7 +38,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Shaped to plug directly into window.renderTransactions() and
   // window.renderRecents() on the frontend with no further transformation.
-  const transactions = entries.map((e: typeof entries[number]) => {
+  const transactions = recentEntries.map((e: typeof entries[number]) => {
     const created = new Date(e.createdAt);
     const amountNum = parseFloat(e.amount);
     return {

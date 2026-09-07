@@ -13,6 +13,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const admin = await requireAdmin(req, res);
   if (!admin) return;
 
+  try {
+
   const depositId = typeof req.body?.depositId === 'string' ? req.body.depositId : '';
   const target = Number(req.body?.targetAmount);
   if (!depositId || !Number.isFinite(target) || target <= 0) {
@@ -44,4 +46,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   await db.insert(demoCyclePoints).values({ demoCycleId: cycle.id, value: deposit.amount });
   return res.status(200).json({ cycle });
+  } catch (error) {
+    console.error('DEMO start failed:', error);
+    return res.status(500).json({ error: 'Could not start the DEMO simulation. Make sure the DEMO database migration has been applied.' });
+  }
 }
