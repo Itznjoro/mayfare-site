@@ -294,12 +294,12 @@
                                         </div>
                                         <div class="mb-4 sm:mb-5">
                                             <label class="mb-1.5 block text-xs font-medium text-foreground sm:mb-2 sm:text-sm">Wallet Address</label>
-                                            <input id="withdrawAddressInput" placeholder="Enter your USDT address" class="w-full rounded-lg border border-border px-3 py-2.5 font-mono text-sm text-xs text-foreground placeholder:text-muted-foreground focus:border-[oklch(0.21_0_0)] focus:outline-none sm:px-4 sm:py-3 sm:text-sm" type="text" value="">
+                                            <input id="withdrawAddressInput" placeholder="Enter your USDT address" class="w-full rounded-lg border border-border px-3 py-2.5 font-mono text-sm text-xs text-foreground placeholder:text-muted-foreground focus:border-[oklch(0.21_0_0)] focus:outline-none sm:px-4 sm:py-3 sm:text-sm" type="text" value="" maxlength="42" minlength="34" autocomplete="off" spellcheck="false">
                                         </div>
                                         <div class="mb-4 sm:mb-5">
                                             <label class="mb-1.5 block text-xs font-medium text-foreground sm:mb-2 sm:text-sm">Network</label>
                                             <div class="grid grid-cols-3 gap-2" id="withdrawNetworkButtons">
-                                                <button data-network="TRC20" class="rounded-lg border px-2 py-2 text-[10px] font-medium transition-all sm:px-3 sm:py-2.5 sm:text-xs border-[oklch(0.21_0_0)] bg-[oklch(0.21_0_0)/8] text-foreground">TRC20</button>
+                                                <button data-network="TRC20" class="rounded-lg border px-2 py-2 text-[10px] font-medium transition-all sm:px-3 sm:py-2.5 sm:text-xs border-border text-muted-foreground hover:border-[oklch(0.21_0_0)/50]">TRC20</button>
                                                 <button data-network="ERC20" class="rounded-lg border px-2 py-2 text-[10px] font-medium transition-all sm:px-3 sm:py-2.5 sm:text-xs border-border text-muted-foreground hover:border-[oklch(0.21_0_0)/50]">ERC20</button>
                                                 <button data-network="BEP20" class="rounded-lg border px-2 py-2 text-[10px] font-medium transition-all sm:px-3 sm:py-2.5 sm:text-xs border-border text-muted-foreground hover:border-[oklch(0.21_0_0)/50]">BEP20</button>
                                             </div>
@@ -426,7 +426,9 @@
             <script>
               (function () {
                 var MIN_WITHDRAWAL = 50;
-                var selectedNetwork = 'TRC20';
+                var selectedNetwork = null;
+                var availableBalance = 0;
+                var demoActive = false;
 
                 var balanceEl = document.getElementById('withdrawAvailableBalance');
                 var amountInput = document.getElementById('withdrawAmountInput');
@@ -439,26 +441,92 @@
 
                 if (!balanceEl) return;
 
-                // Reads the real balance shown on this page (currently $0, since no
-                // deposits/returns have been processed yet — this isn't a placeholder,
-                // it's the actual current state). Once a real balance API populates
-                // this element with a live figure, everything below already works off
-                // it correctly with no further changes needed.
-                function getAvailableBalance() {
-                  var text = balanceEl.textContent.replace(/[^0-9.]/g, '');
-                  var val = parseFloat(text);
-                  return isNaN(val) ? 0 : val;
+                function setHelper(text, error) {
+                  helperText.textContent = text;
+                  helperText.classList.toggle('text-destructive', !!error);
+                }
+
+                function updateAddressRules() {
+                  addressInput.maxLength = 42;
+                  addressInput.minLength = selectedNetwork === 'TRC20' ? 34 : (selectedNetwork ? 42 : 0);
+                  addressInput.pattern = selectedNetwork === 'TRC20'
+                    ? 'T[1-9A-HJ-NP-Za-km-z]{33}'
+                    : selectedNetwork
+                      ? '0x[a-fA-F0-9]{40}'
+                      : '';
+                  addressInput.placeholder = selectedNetwork === 'TRC20'
+                    ? 'Enter your TRC20 address (34 characters)'
+                    : selectedNetwork
+                      ? 'Enter your ' + selectedNetwork + ' address (42 characters)'
+                      : 'Select a network first';
+                }
+
+                function isValidAddress(address) {
+                  if (selectedNetwork === 'TRC20') return /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address);
+                  if (selectedNetwork === 'ERC20' || selectedNetwork === 'BEP20') return /^0x[a-fA-F0-9]{40}$/.test(address);
+                  return false;
                 }
 
                 function refreshMaxButton() {
-                  var balance = getAvailableBalance();
-                  maxBtn.textContent = 'Max: $' + balance.toLocaleString();
-                  maxBtn.disabled = balance <= 0;
+                  maxBtn.textContent = 'Max: $' + availableBalance.toLocaleString();
+                  maxBtn.disabled = availableBalance <= 0 || demoActive;
+                }
+
+                function validateForm() {
+                  var amount = parseFloat(amountInput.value);
+                  var address = addressInput.value.trim();
+
+                  if (demoActive) {
+                    setHelper('Withdrawals are unavailable while the DEMO simulation is active.', true);
+                    submitBtn.disabled = true;
+                    return;
+                  }
+                  if (availableBalance <= 0) {
+                    setHelper('You have nothing available to withdraw yet.', false);
+                    submitBtn.disabled = true;
+                    return;
+                  }
+                  if (!amount || amount <= 0) {
+                    setHelper('Enter an amount to withdraw.', false);
+                    submitBtn.disabled = true;
+                    return;
+                  }
+                  if (amount < MIN_WITHDRAWAL) {
+                    setHelper('Minimum withdrawal is $' + MIN_WITHDRAWAL + ' USDT.', true);
+                    submitBtn.disabled = true;
+                    return;
+                  }
+                  if (amount > availableBalance) {
+                    setHelper("That's more than your available balance ($" + availableBalance.toLocaleString() + ').', true);
+                    submitBtn.disabled = true;
+                    return;
+                  }
+                  if (!selectedNetwork) {
+                    setHelper('Select the wallet network.', false);
+                    submitBtn.disabled = true;
+                    return;
+                  }
+                  if (!isValidAddress(address)) {
+                    setHelper(selectedNetwork === 'TRC20'
+                      ? 'Enter a valid TRC20 address (34 characters).'
+                      : 'Enter a valid ' + selectedNetwork + ' address (42 characters).', true);
+                    submitBtn.disabled = true;
+                    return;
+                  }
+                  if (!taxCheckbox.checked) {
+                    setHelper('Confirm the withdrawal checkbox above to continue.', false);
+                    submitBtn.disabled = true;
+                    return;
+                  }
+
+                  setHelper('Ready to submit your withdrawal request.', false);
+                  submitBtn.disabled = false;
                 }
 
                 maxBtn.addEventListener('click', function () {
                   if (maxBtn.disabled) return;
-                  amountInput.value = getAvailableBalance();
+                  // Copy the balance exactly as it is at the moment Max is clicked.
+                  amountInput.value = availableBalance.toFixed(2);
                   validateForm();
                 });
 
@@ -473,80 +541,79 @@
                       b.classList.toggle('border-border', !active);
                       b.classList.toggle('text-muted-foreground', !active);
                     });
+                    updateAddressRules();
+                    validateForm();
                   });
                 });
-
-                function validateForm() {
-                  var balance = getAvailableBalance();
-                  var amount = parseFloat(amountInput.value);
-                  var address = addressInput.value.trim();
-                  var checked = taxCheckbox.checked;
-
-                  if (balance <= 0) {
-                    helperText.textContent = 'You have nothing to withdraw yet. Returns become withdrawable once a cycle completes.';
-                    submitBtn.disabled = true;
-                    return;
-                  }
-                  if (!amount || amount <= 0) {
-                    helperText.textContent = 'Enter an amount to withdraw.';
-                    submitBtn.disabled = true;
-                    return;
-                  }
-                  if (amount < MIN_WITHDRAWAL) {
-                    helperText.textContent = 'Minimum withdrawal is $' + MIN_WITHDRAWAL + ' USDT.';
-                    submitBtn.disabled = true;
-                    return;
-                  }
-                  if (amount > balance) {
-                    helperText.textContent = "That's more than your available balance ($" + balance.toLocaleString() + ")";
-                    submitBtn.disabled = true;
-                    return;
-                  }
-                  if (!address) {
-                    helperText.textContent = 'Enter the wallet address to receive your withdrawal.';
-                    submitBtn.disabled = true;
-                    return;
-                  }
-                  if (!checked) {
-                    helperText.textContent = 'Confirm the tax checkbox above to continue.';
-                    submitBtn.disabled = true;
-                    return;
-                  }
-
-                  helperText.textContent = 'Ready to submit your withdrawal request.';
-                  submitBtn.disabled = false;
-                }
 
                 [amountInput, addressInput].forEach(function (el) {
                   el.addEventListener('input', validateForm);
                 });
                 taxCheckbox.addEventListener('change', validateForm);
 
-                submitBtn.addEventListener('click', function () {
-                  if (submitBtn.disabled) return;
-                  var amount = amountInput.value;
-                  var address = addressInput.value.trim();
+                async function loadBalance() {
+                  try {
+                    var summaryRes = await fetch('/api/account/summary', { cache: 'no-store' });
+                    if (!summaryRes.ok) throw new Error('Could not load your account balance.');
+                    var summary = await summaryRes.json();
+                    availableBalance = Number(summary.balance || 0);
 
-                  var message = [
-                    'New withdrawal request',
-                    'Amount: $' + amount + ' USDT',
-                    'Network: ' + selectedNetwork,
-                    'Withdraw to address: ' + address,
-                  ].join('\n');
+                    // The DEMO is simulation-only. Do not make simulated values
+                    // withdrawable or convert them into real ledger funds.
+                    try {
+                      var demoRes = await fetch('/api/account/demo', { cache: 'no-store' });
+                      if (demoRes.ok) {
+                        var demo = await demoRes.json();
+                        demoActive = !!demo.active;
+                      }
+                    } catch (_) {}
 
-                  function openTelegram() {
-                    window.open('https://t.me/trader_sadiqfx', '_blank');
+                    balanceEl.textContent = '$' + availableBalance.toLocaleString();
+                    refreshMaxButton();
+                    validateForm();
+                  } catch (err) {
+                    availableBalance = 0;
+                    balanceEl.textContent = '$0';
+                    maxBtn.disabled = true;
+                    setHelper(err.message || 'Could not load your available balance.', true);
+                    submitBtn.disabled = true;
                   }
+                }
 
-                  if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(message).then(openTelegram).catch(openTelegram);
-                  } else {
-                    openTelegram();
+                submitBtn.addEventListener('click', async function () {
+                  if (submitBtn.disabled) return;
+                  submitBtn.disabled = true;
+                  setHelper('Submitting your withdrawal request…', false);
+
+                  try {
+                    var res = await fetch('/api/account/withdrawals/create', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        amount: Number(amountInput.value),
+                        address: addressInput.value.trim(),
+                        network: selectedNetwork,
+                        confirmed: taxCheckbox.checked,
+                      }),
+                    });
+                    var raw = await res.text();
+                    var data;
+                    try { data = raw ? JSON.parse(raw) : {}; } catch (_) { data = { error: raw }; }
+                    if (!res.ok) throw new Error(data.error || 'Could not submit the withdrawal request.');
+
+                    amountInput.value = '';
+                    addressInput.value = '';
+                    taxCheckbox.checked = false;
+                    setHelper('Withdrawal request submitted successfully. It is now waiting for admin review.', false);
+                    await loadBalance();
+                  } catch (err) {
+                    setHelper(err.message || 'Could not submit the withdrawal request.', true);
+                    validateForm();
                   }
                 });
 
-                refreshMaxButton();
-                validateForm();
+                updateAddressRules();
+                loadBalance();
               })();
             </script>
             </body>
