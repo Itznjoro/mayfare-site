@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '../../../lib/db';
-import { accountLedger, deposits, withdrawals } from '../../../db/schema';
+import { accountLedger, demoCycles, deposits, withdrawals } from '../../../db/schema';
 import { requireAuth } from '../../../lib/auth';
 
 const MIN_WITHDRAWAL = 50;
@@ -42,28 +42,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const result = await db.transaction(async (tx) => {
       await tx.execute(sql`SELECT id FROM users WHERE id = ${user.id} FOR UPDATE`);
 
-      const ledgerRows = await tx
-        .select({ type: accountLedger.type, amount: accountLedger.amount })
-        .from(accountLedger)
-        .where(eq(accountLedger.userId, user.id));
-      const approvedRows = await tx
-        .select({ amount: deposits.amount, status: deposits.status })
-        .from(deposits)
-        .where(eq(deposits.userId, user.id));
-      const approvedDepositTotal = approvedRows
-        .filter((row) => row.status === 'approved')
-        .reduce((sum, row) => sum + Number(row.amount), 0);
-      const nonDepositLedger = ledgerRows
-        .filter((row) => row.type !== 'deposit')
-        .reduce((sum, row) => sum + Number(row.amount), 0);
-      const balance = approvedDepositTotal + nonDepositLedger;
+      // During the DEMO, withdrawals are part of the simulation. They use the
+      // DEMO cycle's current simulated amount and are marked so admin approval
+      // can reduce the DEMO balance without creating a real ledger withdrawal.
+      const [activeDemo] = await tx.select().from(demoCycles)
+        .where(and(eq(demoCycles.userId, user.id), eq(demoCycles.status, 'active')))
+        .limit(1);
+
+      let balance = 0;
+      let demoMarker: string | null = null;
+
+      if (activeDemo) {
+        balance = Number(activeDemo.currentAmount);
+        demoMarker = `DEMO_SIMULATION:${activeDemo.id}`;
+      } else {
+        const ledgerRows = await tx
+          .select({ type: accountLedger.type, amount: accountLedger.amount })
+          .from(accountLedger)
+          .where(eq(accountLedger.userId, user.id));
+        const approvedRows = await tx
+          .select({ amount: deposits.amount, status: deposits.status })
+          .from(deposits)
+          .where(eq(deposits.userId, user.id));
+        const approvedDepositTotal = approvedRows
+          .filter((row) => row.status === 'approved')
+          .reduce((sum, row) => sum + Number(row.amount), 0);
+        const nonDepositLedger = ledgerRows
+          .filter((row) => row.type !== 'deposit')
+          .reduce((sum, row) => sum + Number(row.amount), 0);
+        balance = approvedDepositTotal + nonDepositLedger;
+      }
 
       const pendingRows = await tx
-        .select({ amount: withdrawals.amount, status: withdrawals.status })
+        .select({ amount: withdrawals.amount, status: withdrawals.status, adminNote: withdrawals.adminNote })
         .from(withdrawals)
         .where(eq(withdrawals.userId, user.id));
       const pendingAmount = pendingRows
-        .filter((row) => row.status === 'pending')
+        .filter((row) => row.status === 'pending' && (demoMarker ? String(row.adminNote || '') === demoMarker : !String(row.adminNote || '').startsWith('DEMO_SIMULATION:')))
         .reduce((sum, row) => sum + Number(row.amount), 0);
       const availableForRequest = balance - pendingAmount;
 
@@ -77,6 +92,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         currency: 'USDT',
         status: 'pending',
         destination: `${network}:${address}`,
+        adminNote: demoMarker || null,
       }).returning();
 
       return withdrawal;

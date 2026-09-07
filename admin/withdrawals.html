@@ -92,7 +92,7 @@
         return '<tr>' +
           '<td>' + escapeHtml(w.userFullName) + '<br><span style="color:var(--muted-foreground);font-size:.75rem">' + escapeHtml(w.userEmail) + '</span></td>' +
           '<td>' + fmtMoney(w.amount, w.currency) + '</td>' +
-          '<td><span class="admin-badge ' + escapeHtml(w.status) + '">' + escapeHtml(w.status) + '</span></td>' +
+          '<td><span class="admin-badge ' + escapeHtml(w.status) + '">' + escapeHtml(w.status) + '</span>' + (String(w.adminNote || '').startsWith('DEMO_SIMULATION:') ? '<br><span style="font-size:.65rem;color:var(--muted-foreground)">DEMO SIMULATION</span>' : '') + '</td>' +
           '<td>' + escapeHtml(network) + '</td>' +
           '<td class="address">' + escapeHtml(address) + '</td>' +
           '<td>' + fmtDate(w.createdAt) + '</td>' +

@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { eq, sql } from 'drizzle-orm';
 import { db } from '../../../../lib/db';
-import { accountLedger, deposits, withdrawals } from '../../../../db/schema';
+import { accountLedger, demoCycles, deposits, withdrawals } from '../../../../db/schema';
 import { requireAdmin } from '../../../../lib/auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -22,6 +22,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       await tx.execute(sql`SELECT id FROM users WHERE id = ${existing.userId} FOR UPDATE`);
 
+      const amount = Number(existing.amount);
+      const demoMarker = String(existing.adminNote || '');
+
+      if (demoMarker.startsWith('DEMO_SIMULATION:')) {
+        const demoCycleId = demoMarker.slice('DEMO_SIMULATION:'.length);
+        const [cycle] = await tx.select().from(demoCycles).where(eq(demoCycles.id, demoCycleId)).limit(1);
+        if (!cycle || cycle.userId !== existing.userId) {
+          throw new Error('The DEMO cycle linked to this withdrawal was not found.');
+        }
+
+        const demoBalance = Number(cycle.currentAmount);
+        if (amount > demoBalance + 1e-8) {
+          throw new Error(`Insufficient DEMO balance. Current DEMO balance is $${Math.max(0, demoBalance).toLocaleString()}.`);
+        }
+
+        const newDemoBalance = demoBalance - amount;
+        const [updated] = await tx.update(withdrawals).set({
+          status: 'approved',
+          reviewedBy: admin.id,
+          reviewedAt: new Date(),
+          updatedAt: new Date(),
+        }).where(eq(withdrawals.id, id)).returning();
+
+        await tx.update(demoCycles).set({
+          currentAmount: newDemoBalance.toFixed(8),
+          updatedAt: new Date(),
+        }).where(eq(demoCycles.id, cycle.id));
+
+        await tx.execute(sql`
+          INSERT INTO "demo_cycle_points" ("demo_cycle_id", "value")
+          VALUES (${cycle.id}, ${newDemoBalance.toFixed(8)})
+        `);
+
+        return updated;
+      }
+
+      // Normal (non-DEMO) withdrawals continue to use the real account ledger.
       const ledgerRows = await tx
         .select({ type: accountLedger.type, amount: accountLedger.amount })
         .from(accountLedger)
@@ -37,7 +74,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .filter((row) => row.type !== 'deposit')
         .reduce((sum, row) => sum + Number(row.amount), 0);
       const balance = approvedDepositTotal + nonDepositLedger;
-      const amount = Number(existing.amount);
 
       if (amount > balance + 1e-8) {
         throw new Error(`Insufficient available balance. Current balance is $${Math.max(0, balance).toLocaleString()}.`);

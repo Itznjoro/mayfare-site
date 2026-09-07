@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '../../lib/db';
-import { demoCycles, demoCyclePoints } from '../../db/schema';
+import { demoCycles, demoCyclePoints, withdrawals } from '../../db/schema';
 import { requireAuth } from '../../lib/auth';
 
 function clamp(n: number, min: number, max: number) { return Math.min(max, Math.max(min, n)); }
@@ -80,6 +80,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const currentAmount = Number(cycle.currentAmount);
   const profit = currentAmount - starting;
   const pending = Math.max(target - currentAmount, 0);
+
+  // DEMO withdrawals are simulated separately from the real account ledger.
+  // Pending DEMO requests reserve part of the current simulated balance.
+  const demoWithdrawalRows = await db.select({ amount: withdrawals.amount, status: withdrawals.status, adminNote: withdrawals.adminNote })
+    .from(withdrawals)
+    .where(eq(withdrawals.userId, user.id));
+  const demoMarker = `DEMO_SIMULATION:${cycle.id}`;
+  const pendingDemoWithdrawals = demoWithdrawalRows
+    .filter((row) => row.status === 'pending' && String(row.adminNote || '') === demoMarker)
+    .reduce((sum, row) => sum + Number(row.amount), 0);
+  const withdrawableAmount = Math.max(currentAmount - pendingDemoWithdrawals, 0);
+
   const chartPoints = minuteRows.map((p) => ({
     createdAt: new Date(p.bucket).toISOString(),
     value: Number(p.value),
@@ -87,6 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(200).json({
     active: true,
+    cycleId: cycle.id,
     status: cycle.status,
     startingAmount: starting,
     targetAmount: target,
@@ -94,6 +107,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     profit,
     pendingReturn: pending,
     payout: profit,
+    pendingDemoWithdrawals,
+    withdrawableAmount,
     progressPercent: target > 0 ? (currentAmount / target) * 100 : 0,
     expiresAt: cycle.expiresAt,
     chartPoints,

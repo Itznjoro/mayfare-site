@@ -13,6 +13,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const admin = await requireAdmin(req, res);
   if (!admin) return;
 
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   const statusFilter = typeof req.query.status === 'string' ? req.query.status : null;
   const rows = await db
     .select({
