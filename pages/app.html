@@ -546,7 +546,15 @@
                     var bucketTime = Math.floor(time / (interval * 1000)) * (interval * 1000);
                     buckets[bucketTime] = { createdAt: new Date(bucketTime).toISOString(), value: Number(p.value) || 0 };
                   });
-                  return Object.keys(buckets).sort(function (a, b) { return Number(a) - Number(b); }).map(function (key) { return buckets[key]; });
+                  var ordered = Object.keys(buckets).sort(function (a, b) { return Number(a) - Number(b); }).map(function (key) { return buckets[key]; });
+                  if (ordered.length === 1) {
+                    ordered[0].x = 150;
+                  } else {
+                    ordered.forEach(function (p, i) {
+                      p.x = (i / (ordered.length - 1)) * 300;
+                    });
+                  }
+                  return ordered;
                 }
 
                 function setActiveChartTimeframe(name) {
