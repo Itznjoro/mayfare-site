@@ -3,6 +3,7 @@ import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '../../lib/db';
 import { demoCycles, demoCyclePoints, withdrawals } from '../../db/schema';
 import { requireAuth } from '../../lib/auth';
+import { ensureWithdrawalTables } from '../../lib/withdrawal-db';
 
 function clamp(n: number, min: number, max: number) { return Math.min(max, Math.max(min, n)); }
 
@@ -24,6 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const user = await requireAuth(req, res);
   if (!user) return;
 
+  await ensureWithdrawalTables();
 
   let [cycle] = await db.select().from(demoCycles)
     .where(and(eq(demoCycles.userId, user.id), eq(demoCycles.status, 'active'))).limit(1);

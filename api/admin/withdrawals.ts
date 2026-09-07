@@ -3,6 +3,7 @@ import { desc, eq } from 'drizzle-orm';
 import { db } from '../../lib/db';
 import { users, withdrawals } from '../../db/schema';
 import { requireAdmin } from '../../lib/auth';
+import { ensureWithdrawalTables } from '../../lib/withdrawal-db';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -12,6 +13,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const admin = await requireAdmin(req, res);
   if (!admin) return;
+
+  await ensureWithdrawalTables();
 
   res.setHeader('Cache-Control', 'no-store, max-age=0');
   const statusFilter = typeof req.query.status === 'string' ? req.query.status : null;

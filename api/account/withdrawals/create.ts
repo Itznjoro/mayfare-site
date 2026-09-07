@@ -1,8 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { db } from '../../../lib/db';
 import { accountLedger, demoCycles, deposits, withdrawals } from '../../../db/schema';
 import { requireAuth } from '../../../lib/auth';
+import { ensureWithdrawalTables } from '../../../lib/withdrawal-db';
 
 const MIN_WITHDRAWAL = 50;
 
@@ -20,6 +21,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const user = await requireAuth(req, res);
   if (!user) return;
+
+  await ensureWithdrawalTables();
 
   const amount = Number(req.body?.amount);
   const network = String(req.body?.network || '').toUpperCase();

@@ -3,7 +3,6 @@ import { desc, eq } from 'drizzle-orm';
 import { db } from '../../lib/db';
 import { accountLedger, deposits } from '../../db/schema';
 import { requireAuth } from '../../lib/auth';
-import { getCurrentBalance } from '../../lib/ledger';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {

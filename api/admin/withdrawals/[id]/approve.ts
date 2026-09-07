@@ -3,6 +3,7 @@ import { eq, sql } from 'drizzle-orm';
 import { db } from '../../../../lib/db';
 import { accountLedger, demoCycles, deposits, withdrawals } from '../../../../db/schema';
 import { requireAdmin } from '../../../../lib/auth';
+import { ensureWithdrawalTables } from '../../../../lib/withdrawal-db';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -11,6 +12,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   const admin = await requireAdmin(req, res);
   if (!admin) return;
+
+  await ensureWithdrawalTables();
+
   const id = String(req.query.id || '');
   if (!id) return res.status(400).json({ error: 'Withdrawal id is required.' });
 
