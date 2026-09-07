@@ -486,34 +486,33 @@
             <script src="../scripts/dashboard-nav.js"></script>
             <script>
               (function () {
-                // Empty for now — no real transaction-read endpoint exists yet.
-                // Once one does, call window.renderRecents(allTransactions) with
-                // the same row shape used on the Transactions page, and this
-                // automatically filters to deposits only and shows the 5 most
-                // recent, matching what "Recent" is supposed to mean here.
+                // Recent activity uses the same transaction rows as the
+                // Transactions page and shows both deposits and withdrawals.
                 var list = document.getElementById('recentDepositsList');
                 var emptyMsg = document.getElementById('recentDepositsEmpty');
                 if (!list) return;
 
                 window.renderRecents = function (allTransactions) {
-                  var deposits = (allTransactions || [])
-                    .filter(function (tx) { return tx.type === 'deposit'; })
-                    .slice(0, 5);
+                  var recent = (allTransactions || []).slice(0, 5);
 
-                  if (!deposits.length) {
-                    list.innerHTML = '<div class="text-center text-[11px] text-muted-foreground sm:text-xs py-2">No recent deposits yet.</div>';
+                  if (!recent.length) {
+                    list.innerHTML = '<div class="text-center text-[11px] text-muted-foreground sm:text-xs py-2">No recent transactions yet.</div>';
                     return;
                   }
 
-                  list.innerHTML = deposits.map(function (tx) {
+                  list.innerHTML = recent.map(function (tx) {
+                    var isWithdrawal = tx.type === 'withdraw' || tx.type === 'withdrawal';
+                    var icon = isWithdrawal
+                      ? '<line x1="5" y1="12" x2="19" y2="12" />'
+                      : '<line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />';
                     return '' +
                       '<div class="flex items-center justify-between">' +
                       '<div class="flex items-center gap-2">' +
                       '<div class="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground">' +
-                      '<svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12" /></svg>' +
+                      '<svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + icon + '</svg>' +
                       '</div>' +
-                      '<div><div class="text-[11px] capitalize text-foreground sm:text-xs">Deposit</div>' +
-                      '<div class="text-[9px] text-muted-foreground sm:text-[10px]">' + tx.date + '</div></div>' +
+                      '<div><div class="text-[11px] capitalize text-foreground sm:text-xs">' + (tx.label || (isWithdrawal ? 'Withdrawal' : 'Deposit')) + '</div>' +
+                      '<div class="text-[9px] text-muted-foreground sm:text-[10px]">' + tx.date + (tx.note ? ' • ' + tx.note : '') + '</div></div>' +
                       '</div>' +
                       '<span class="text-[11px] font-medium sm:text-xs text-foreground">' + tx.amountDisplay + '</span>' +
                       '</div>';

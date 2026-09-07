@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { desc, eq } from 'drizzle-orm';
 import { db } from '../../lib/db';
-import { accountLedger, deposits } from '../../db/schema';
+import { accountLedger, deposits, withdrawals } from '../../db/schema';
 import { requireAuth } from '../../lib/auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -62,6 +62,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       createdAt: Date.now(),
     }));
 
+  // Pending/approved/rejected/completed withdrawal requests are stored in
+  // withdrawals. Approved/completed withdrawals that already have a ledger
+  // entry are represented by that ledger row, so only add requests that are
+  // not already represented there.
+  const userWithdrawals = await db
+    .select({
+      id: withdrawals.id,
+      amount: withdrawals.amount,
+      currency: withdrawals.currency,
+      status: withdrawals.status,
+      createdAt: withdrawals.createdAt,
+    })
+    .from(withdrawals)
+    .where(eq(withdrawals.userId, user.id));
+
+  const ledgerWithdrawalRefs = new Set(
+    entries
+      .filter((e) => e.type === 'withdrawal' && e.referenceId)
+      .map((e) => e.referenceId as string)
+  );
+
   // Shaped to plug directly into window.renderTransactions() and
   // window.renderRecents() on the frontend with no further transformation.
   const recentEntries = entries.slice(0, 100);
@@ -70,18 +91,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const amountNum = parseFloat(e.amount);
     return {
       id: e.id,
-      type: e.type === 'realized_pnl' ? 'return' : e.type,
+      type: e.type === 'realized_pnl' ? 'return' : e.type === 'withdrawal' ? 'withdraw' : e.type,
       label: e.type === 'deposit' ? 'Deposit' : e.type === 'withdrawal' ? 'Withdrawal' : 'Return',
       date: created.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       time: created.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-      amountDisplay: (amountNum >= 0 ? '+' : '') + '$' + Math.abs(amountNum).toLocaleString(),
+      amountDisplay: e.type === 'withdrawal'
+        ? '-$' + Math.abs(amountNum).toLocaleString()
+        : (amountNum >= 0 ? '+' : '') + '$' + Math.abs(amountNum).toLocaleString(),
       netDisplay: '$' + parseFloat(e.balanceAfter).toLocaleString(),
       currency: 'USDT',
       note: e.referenceTable ? 'Ref: ' + e.referenceTable : '',
+      createdAt: created.getTime(),
     };
   });
 
-  const allTransactions = transactions.concat(syntheticDeposits as any);
+  const withdrawalTransactions = userWithdrawals
+    .filter((w) => !ledgerWithdrawalRefs.has(w.id))
+    .map((w) => {
+      const created = new Date(w.createdAt);
+      const amountNum = Number(w.amount);
+      const statusLabel = w.status.charAt(0).toUpperCase() + w.status.slice(1);
+      return {
+        id: w.id,
+        type: 'withdraw' as const,
+        label: 'Withdrawal',
+        date: created.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        time: created.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+        amountDisplay: '-$' + Math.abs(amountNum).toLocaleString(),
+        netDisplay: '$' + balance.toLocaleString(),
+        currency: w.currency,
+        note: 'Status: ' + statusLabel,
+        createdAt: created.getTime(),
+      };
+    });
+
+
+  const allTransactions = transactions
+    .concat(syntheticDeposits as any, withdrawalTransactions as any)
+    .sort((a: any, b: any) => Number(b.createdAt) - Number(a.createdAt));
 
   return res.status(200).json({
     balance,

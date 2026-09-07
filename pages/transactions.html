@@ -321,7 +321,7 @@
                                 </div>
                             </div>
                             <div class="block lg:hidden space-y-2" id="txMobileList">
-                                <div class="bg-card border border-border rounded-lg p-6 text-center text-xs sm:text-sm text-muted-foreground" id="txMobileEmpty">No transactions yet. Once you make a deposit, it'll show up here.</div>
+                                <div class="bg-card border border-border rounded-lg p-6 text-center text-xs sm:text-sm text-muted-foreground" id="txMobileEmpty">No transactions yet. Once you make a deposit or withdrawal, it'll show up here.</div>
                             </div>
                             <div class="hidden lg:block bg-card border border-border rounded-lg overflow-hidden">
                                 <div class="overflow-x-auto">
@@ -338,7 +338,7 @@
                                         </thead>
                                         <tbody class="divide-y divide-border" id="txTableBody">
                                             <tr id="txTableEmpty">
-                                                <td colspan="6" class="px-4 py-8 text-center text-xs sm:text-sm text-muted-foreground">No transactions yet. Once you make a deposit, it'll show up here.</td>
+                                                <td colspan="6" class="px-4 py-8 text-center text-xs sm:text-sm text-muted-foreground">No transactions yet. Once you make a deposit or withdrawal, it'll show up here.</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -427,14 +427,14 @@
                 function render() {
                   var filtered = transactions.filter(function (tx) {
                     var matchesFilter = currentFilter === 'all' || tx.type === currentFilter;
-                    var matchesSearch = !currentSearch || tx.id.toLowerCase().indexOf(currentSearch.toLowerCase()) !== -1;
+                    var matchesSearch = !currentSearch || String(tx.id).toLowerCase().indexOf(currentSearch.toLowerCase()) !== -1;
                     return matchesFilter && matchesSearch;
                   });
 
                   if (!filtered.length) {
                     var emptyMsg = transactions.length
                       ? 'No transactions match your search or filter.'
-                      : "No transactions yet. Once you make a deposit, it'll show up here.";
+                      : "No transactions yet. Once you make a deposit or withdrawal, it'll show up here.";
                     tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-xs sm:text-sm text-muted-foreground">' + emptyMsg + '</td></tr>';
                     mobileList.innerHTML = '<div class="bg-card border border-border rounded-lg p-6 text-center text-xs sm:text-sm text-muted-foreground">' + emptyMsg + '</div>';
                     return;
