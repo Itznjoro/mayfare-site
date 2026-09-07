@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { desc, eq, sql } from 'drizzle-orm';
-import { db } from '../lib/db';
-import { users, withdrawals, accountLedger, demoCycles, deposits } from '../db/schema';
-import { requireAdmin } from '../lib/auth';
-import { ensureWithdrawalTables } from '../lib/withdrawal-db';
+import { db } from '../../lib/db';
+import { users, withdrawals, accountLedger, demoCycles, deposits } from '../../db/schema';
+import { requireAdmin } from '../../lib/auth';
+import { ensureWithdrawalTables } from '../../lib/withdrawal-db';
 
 
 export async function handleList(req: VercelRequest, res: VercelResponse) {

@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { desc, eq } from 'drizzle-orm';
-import { db } from '../lib/db';
-import { deposits, users, accountLedger } from '../db/schema';
-import { requireAdmin } from '../lib/auth';
+import { db } from '../../lib/db';
+import { deposits, users, accountLedger } from '../../db/schema';
+import { requireAdmin } from '../../lib/auth';
 
 
 export async function handleList(req: VercelRequest, res: VercelResponse) {
