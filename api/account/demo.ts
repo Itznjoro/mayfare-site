@@ -24,6 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const user = await requireAuth(req, res);
   if (!user) return;
 
+
   let [cycle] = await db.select().from(demoCycles)
     .where(and(eq(demoCycles.userId, user.id), eq(demoCycles.status, 'active'))).limit(1);
 

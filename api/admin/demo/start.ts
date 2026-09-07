@@ -3,6 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import { db } from '../../../lib/db';
 import { deposits, demoCycles, demoCyclePoints } from '../../../db/schema';
 import { requireAdmin } from '../../../lib/auth';
+import { ensureDemoTables } from '../../../lib/demo-db';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -14,6 +15,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!admin) return;
 
   try {
+  await ensureDemoTables();
 
   const depositId = typeof req.body?.depositId === 'string' ? req.body.depositId : '';
   const target = Number(req.body?.targetAmount);
@@ -32,22 +34,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const startedAt = new Date();
   const expiresAt = new Date(startedAt.getTime() + 24 * 60 * 60 * 1000);
-  const [cycle] = await db.insert(demoCycles).values({
-    userId: deposit.userId,
-    sourceDepositId: deposit.id,
-    startingAmount: deposit.amount,
-    targetAmount: target.toFixed(8),
-    currentAmount: deposit.amount,
-    status: 'active',
-    startedAt,
-    expiresAt,
-    updatedAt: startedAt,
-  }).returning();
+  const cycle = await db.transaction(async (tx) => {
+    const [created] = await tx.insert(demoCycles).values({
+      userId: deposit.userId,
+      sourceDepositId: deposit.id,
+      startingAmount: deposit.amount,
+      targetAmount: target.toFixed(8),
+      currentAmount: deposit.amount,
+      status: 'active',
+      startedAt,
+      expiresAt,
+      updatedAt: startedAt,
+    }).returning();
 
-  await db.insert(demoCyclePoints).values({ demoCycleId: cycle.id, value: deposit.amount });
+    await tx.insert(demoCyclePoints).values({ demoCycleId: created.id, value: deposit.amount });
+    return created;
+  });
+
   return res.status(200).json({ cycle });
   } catch (error) {
     console.error('DEMO start failed:', error);
-    return res.status(500).json({ error: 'Could not start the DEMO simulation. Make sure the DEMO database migration has been applied.' });
+    return res.status(500).json({ error: error instanceof Error ? error.message : 'Could not start the DEMO simulation.' });
   }
 }
