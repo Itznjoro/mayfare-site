@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { db } from './db';
 import { accountLedger } from '../db/schema';
 
@@ -10,14 +10,14 @@ import { accountLedger } from '../db/schema';
  * when displaying the dashboard.
  */
 export async function getCurrentBalance(userId: string): Promise<number> {
-  const [latest] = await db
-    .select({ balanceAfter: accountLedger.balanceAfter })
+  // The ledger amount is the source of truth. Summing it avoids incorrect
+  // balances when two entries share the same timestamp or an old snapshot is stale.
+  const [row] = await db
+    .select({ balance: sql<string>`coalesce(sum(${accountLedger.amount}), 0)` })
     .from(accountLedger)
-    .where(eq(accountLedger.userId, userId))
-    .orderBy(desc(accountLedger.createdAt))
-    .limit(1);
+    .where(eq(accountLedger.userId, userId));
 
-  return latest ? parseFloat(latest.balanceAfter) : 0;
+  return Number(row?.balance ?? 0);
 }
 
 /**

@@ -42,24 +42,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .where(eq(deposits.id, id))
         .returning();
 
-      const current = await tx
-        .select({ balanceAfter: accountLedger.balanceAfter })
+      // Idempotency guard: never create a second ledger credit for the same deposit.
+      const [existingCredit] = await tx
+        .select({ id: accountLedger.id })
         .from(accountLedger)
-        .where(eq(accountLedger.userId, deposit.userId))
-        .orderBy(desc(accountLedger.createdAt))
+        .where(eq(accountLedger.referenceId, deposit.id))
         .limit(1);
-      const currentBalance = current[0] ? parseFloat(current[0].balanceAfter) : 0;
-      const amount = parseFloat(deposit.amount);
-      const newBalance = currentBalance + amount;
 
-      await tx.insert(accountLedger).values({
-        userId: deposit.userId,
-        type: 'deposit',
-        amount: amount.toString(),
-        referenceTable: 'deposits',
-        referenceId: deposit.id,
-        balanceAfter: newBalance.toString(),
-      });
+      if (!existingCredit) {
+        // Rebuild the running balance from the ledger amounts instead of trusting
+        // a possibly stale balanceAfter snapshot.
+        const ledgerRows = await tx
+          .select({ amount: accountLedger.amount })
+          .from(accountLedger)
+          .where(eq(accountLedger.userId, deposit.userId));
+        const currentBalance = ledgerRows.reduce((sum, row) => sum + Number(row.amount), 0);
+        const amount = Number(deposit.amount);
+        const newBalance = currentBalance + amount;
+
+        await tx.insert(accountLedger).values({
+          userId: deposit.userId,
+          type: 'deposit',
+          amount: amount.toString(),
+          referenceTable: 'deposits',
+          referenceId: deposit.id,
+          balanceAfter: newBalance.toString(),
+        });
+      }
 
       return updated;
     });

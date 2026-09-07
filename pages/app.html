@@ -586,6 +586,16 @@
                     .then(function (data) {
                       if (data.active) {
                         setDemoData(data);
+                        // Keep the underlying approved-deposit totals synchronized too.
+                        fetch('/api/account/summary', { cache: 'no-store' })
+                          .then(function (res) { return res.ok ? res.json() : null; })
+                          .then(function (summary) {
+                            if (!summary) return;
+                            // The DEMO value remains the visible Total Assets; the
+                            // approved-deposit total is the source for Traded.
+                            document.getElementById('statTraded').textContent = fmtMoney(summary.totalDeposited);
+                            if (window.renderRecents) window.renderRecents(summary.transactions);
+                          }).catch(function () {});
                       } else {
                         fetch('/api/account/summary', { cache: 'no-store' })
                           .then(function (res) { return res.json(); })

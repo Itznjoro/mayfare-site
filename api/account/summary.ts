@@ -20,38 +20,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .where(eq(accountLedger.userId, user.id))
     .orderBy(desc(accountLedger.createdAt));
 
-  const balance = await getCurrentBalance(user.id);
-
-  // Reconcile approved deposits that somehow lack a ledger row. This keeps
-  // the client dashboard consistent with the admin-approved deposit state.
+  // Approved deposits are the authoritative deposit state. Include them directly
+  // so the dashboard remains correct even if an older approval happened before
+  // its ledger credit was written.
   const approvedDeposits = await db
     .select({ id: deposits.id, amount: deposits.amount, status: deposits.status })
     .from(deposits)
     .where(eq(deposits.userId, user.id));
   const approvedOnly = approvedDeposits.filter((d) => d.status === 'approved');
-  const ledgerDepositIds = new Set(entries.map((e) => e.referenceId).filter(Boolean));
-  const missingApprovedDepositCredit = approvedOnly
-    .filter((d) => !ledgerDepositIds.has(d.id))
-    .reduce((sum, d) => sum + parseFloat(d.amount), 0);
-  const reconciledBalance = balance + missingApprovedDepositCredit;
+  const approvedDepositTotal = approvedOnly.reduce((sum, d) => sum + Number(d.amount), 0);
+  // Keep any non-deposit ledger activity (e.g. realized P/L) while using the
+  // approved-deposit table as the deposit source of truth.
+  const nonDepositLedger = entries
+    .filter((e) => e.type !== 'deposit')
+    .reduce((sum, e) => sum + Number(e.amount), 0);
+  const balance = approvedDepositTotal + nonDepositLedger;
 
-  const recentEntries = entries.slice(0, 100);
-
-  const ledgerDeposited = entries
-    .filter((e: typeof entries[number]) => e.type === 'deposit')
-    .reduce((sum: number, e: typeof entries[number]) => sum + parseFloat(e.amount), 0);
-  const totalDeposited = ledgerDeposited + missingApprovedDepositCredit;
-
+  const totalDeposited = approvedDepositTotal;
   const totalWithdrawn = entries
-    .filter((e: typeof entries[number]) => e.type === 'withdrawal')
-    .reduce((sum: number, e: typeof entries[number]) => sum + Math.abs(parseFloat(e.amount)), 0);
-
+    .filter((e) => e.type === 'withdrawal')
+    .reduce((sum, e) => sum + Math.abs(Number(e.amount)), 0);
   const totalRealizedPnl = entries
-    .filter((e: typeof entries[number]) => e.type === 'realized_pnl')
-    .reduce((sum: number, e: typeof entries[number]) => sum + parseFloat(e.amount), 0);
+    .filter((e) => e.type === 'realized_pnl')
+    .reduce((sum, e) => sum + Number(e.amount), 0);
+  // Include approved deposits in Recent Deposits even if an older approval
+  // predates the ledger credit. Current approvals still create the ledger row.
+  const ledgerDepositRefs = new Set(
+    entries.filter((e) => e.type === 'deposit' && e.referenceId).map((e) => e.referenceId as string)
+  );
+  const syntheticDeposits = approvedOnly
+    .filter((d) => !ledgerDepositRefs.has(d.id))
+    .map((d) => ({
+      id: 'deposit-' + d.id,
+      type: 'deposit' as const,
+      label: 'Deposit',
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      time: '',
+      amountDisplay: '+' + '$' + Number(d.amount).toLocaleString(),
+      netDisplay: '$' + balance.toLocaleString(),
+      currency: 'USDT',
+      note: 'Ref: deposits',
+      createdAt: Date.now(),
+    }));
 
   // Shaped to plug directly into window.renderTransactions() and
   // window.renderRecents() on the frontend with no further transformation.
+  const recentEntries = entries.slice(0, 100);
   const transactions = recentEntries.map((e: typeof entries[number]) => {
     const created = new Date(e.createdAt);
     const amountNum = parseFloat(e.amount);
@@ -68,11 +82,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
   });
 
+  const allTransactions = transactions.concat(syntheticDeposits as any);
+
   return res.status(200).json({
-    balance: reconciledBalance,
+    balance,
     totalDeposited,
     totalWithdrawn,
     totalRealizedPnl,
-    transactions,
+    transactions: allTransactions,
   });
 }
