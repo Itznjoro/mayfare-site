@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/api/auth", "destination": "/api/auth?route=" },
+    { "source": "/api/auth/:path*", "destination": "/api/auth?route=$1" },
+    { "source": "/api/admin/deposits", "destination": "/api/admin/deposits?route=" },
+    { "source": "/api/admin/deposits/:path*", "destination": "/api/admin/deposits?route=$1" },
+    { "source": "/api/admin/withdrawals", "destination": "/api/admin/withdrawals?route=" },
+    { "source": "/api/admin/withdrawals/:path*", "destination": "/api/admin/withdrawals?route=$1" }
+  ]
+}
