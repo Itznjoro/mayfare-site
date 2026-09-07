@@ -314,11 +314,11 @@
                             <span class="text-[10px] px-2 py-0.5 bg-[oklch(0.62_0.12_178)/12] text-[oklch(0.62_0.12_178)] rounded font-mono">USDT</span>
                           </div>
                           <div class="flex items-center gap-1 p-1 bg-secondary/50 rounded-lg">
-                            <button class="px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-mono rounded transition-all text-muted-foreground hover:text-foreground hover:bg-secondary">1m</button>
-                            <button class="px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-mono rounded transition-all text-muted-foreground hover:text-foreground hover:bg-secondary">5m</button>
-                            <button class="px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-mono rounded transition-all text-muted-foreground hover:text-foreground hover:bg-secondary">15m</button>
-                            <button class="px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-mono rounded transition-all bg-[oklch(0.62_0.12_178)] text-white">1H</button>
-                            <button class="px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-mono rounded transition-all text-muted-foreground hover:text-foreground hover:bg-secondary">4H</button>
+                            <button type="button" data-chart-timeframe="1m" class="portfolio-timeframe px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-mono rounded transition-all text-muted-foreground hover:text-foreground hover:bg-secondary">1m</button>
+                            <button type="button" data-chart-timeframe="5m" class="portfolio-timeframe px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-mono rounded transition-all text-muted-foreground hover:text-foreground hover:bg-secondary">5m</button>
+                            <button type="button" data-chart-timeframe="15m" class="portfolio-timeframe px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-mono rounded transition-all text-muted-foreground hover:text-foreground hover:bg-secondary">15m</button>
+                            <button type="button" data-chart-timeframe="1H" class="portfolio-timeframe px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-mono rounded transition-all bg-[oklch(0.62_0.12_178)] text-white">1H</button>
+                            <button type="button" data-chart-timeframe="4H" class="portfolio-timeframe px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-mono rounded transition-all text-muted-foreground hover:text-foreground hover:bg-secondary">4H</button>
                           </div>
                         </div>
                         <div class="relative h-48 sm:h-64">
@@ -521,6 +521,54 @@
                 };
 
                 // ---- Portfolio chart ----
+                var activeChartTimeframe = '1H';
+                var latestPortfolioPoints = [];
+                var latestPortfolioOpts = {};
+                var chartTimeframeSeconds = { '1m': 60, '5m': 300, '15m': 900, '1H': 3600, '4H': 14400 };
+                var chartWindowSeconds = { '1m': 3600, '5m': 14400, '15m': 43200, '1H': 86400, '4H': 86400 };
+
+                function preparePortfolioPoints(points) {
+                  if (!points || !points.length) return [];
+                  var interval = chartTimeframeSeconds[activeChartTimeframe] || 3600;
+                  var windowSeconds = chartWindowSeconds[activeChartTimeframe] || 86400;
+                  var now = Date.now();
+                  var cutoff = now - (windowSeconds * 1000);
+                  var visible = points.filter(function (p) {
+                    return !p.createdAt || new Date(p.createdAt).getTime() >= cutoff;
+                  });
+                  if (!visible.length) visible = [points[points.length - 1]];
+
+                  // Group minute history into the selected timeframe. Each bucket
+                  // uses the last known portfolio value, just like a closing value.
+                  var buckets = {};
+                  visible.forEach(function (p) {
+                    var time = p.createdAt ? new Date(p.createdAt).getTime() : now;
+                    var bucketTime = Math.floor(time / (interval * 1000)) * (interval * 1000);
+                    buckets[bucketTime] = { createdAt: new Date(bucketTime).toISOString(), value: Number(p.value) || 0 };
+                  });
+                  return Object.keys(buckets).sort(function (a, b) { return Number(a) - Number(b); }).map(function (key) { return buckets[key]; });
+                }
+
+                function setActiveChartTimeframe(name) {
+                  if (!chartTimeframeSeconds[name]) return;
+                  activeChartTimeframe = name;
+                  document.querySelectorAll('.portfolio-timeframe').forEach(function (btn) {
+                    var active = btn.getAttribute('data-chart-timeframe') === name;
+                    btn.classList.toggle('bg-[oklch(0.62_0.12_178)]', active);
+                    btn.classList.toggle('text-white', active);
+                    btn.classList.toggle('text-muted-foreground', !active);
+                    btn.classList.toggle('hover:text-foreground', !active);
+                    btn.classList.toggle('hover:bg-secondary', !active);
+                  });
+                  if (window.renderPortfolioChart) window.renderPortfolioChart(latestPortfolioPoints, latestPortfolioOpts);
+                }
+
+                document.querySelectorAll('.portfolio-timeframe').forEach(function (btn) {
+                  btn.addEventListener('click', function () {
+                    setActiveChartTimeframe(btn.getAttribute('data-chart-timeframe'));
+                  });
+                });
+
                 window.renderPortfolioChart = function (points, opts) {
                   var svgGroup = document.getElementById('portfolioChartData');
                   var emptyMsg = document.getElementById('portfolioChartEmptyMsg');
@@ -535,6 +583,9 @@
                     return;
                   }
                   opts = opts || {};
+                  latestPortfolioPoints = points || [];
+                  latestPortfolioOpts = opts;
+                  points = preparePortfolioPoints(points || []);
                   var values = points.map(function (p) { return p.value; });
                   var min = Math.min.apply(null, values);
                   var max = Math.max.apply(null, values) || 1;

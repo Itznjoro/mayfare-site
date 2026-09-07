@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '../../lib/db';
 import { demoCycles, demoCyclePoints } from '../../db/schema';
 import { requireAuth } from '../../lib/auth';
@@ -61,16 +61,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     [cycle] = await db.select().from(demoCycles).where(eq(demoCycles.id, cycle.id)).limit(1);
   }
 
-  const points = await db.select({ value: demoCyclePoints.value, createdAt: demoCyclePoints.createdAt })
-    .from(demoCyclePoints).where(eq(demoCyclePoints.demoCycleId, cycle.id))
-    .orderBy(asc(demoCyclePoints.createdAt)).limit(180);
+  // Keep the chart lightweight while preserving the full DEMO history. The raw
+  // points are written roughly once per second, so aggregate them to one point
+  // per minute in PostgreSQL. The client can then render 1m/5m/15m/1H/4H views
+  // without downloading tens of thousands of rows on every dashboard poll.
+  const minuteRows = (await db.execute(sql`
+    SELECT
+      date_trunc('minute', "created_at") AS bucket,
+      (array_agg("value" ORDER BY "created_at" DESC))[1] AS value
+    FROM "demo_cycle_points"
+    WHERE "demo_cycle_id" = ${cycle.id}
+    GROUP BY bucket
+    ORDER BY bucket ASC
+  `)).rows as Array<{ bucket: Date | string; value: string }>;
 
   const starting = Number(cycle.startingAmount);
   const target = Number(cycle.targetAmount);
   const currentAmount = Number(cycle.currentAmount);
   const profit = currentAmount - starting;
   const pending = Math.max(target - currentAmount, 0);
-  const chartPoints = points.map((p, i) => ({ x: points.length <= 1 ? 300 : (i / (points.length - 1)) * 300, value: Number(p.value) }));
+  const chartPoints = minuteRows.map((p) => ({
+    createdAt: new Date(p.bucket).toISOString(),
+    value: Number(p.value),
+  }));
 
   return res.status(200).json({
     active: true,

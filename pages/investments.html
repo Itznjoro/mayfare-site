@@ -371,7 +371,7 @@
                                                 </div>
                                                 <div>
                                                     <label class="mb-1.5 block text-xs font-medium text-foreground sm:text-sm">Transaction hash</label>
-                                                    <input id="txHashInput" placeholder="Paste the TRC20 transaction hash after sending" class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base font-mono text-xs sm:text-sm" type="text" value="">
+                                                    <input id="txHashInput" minlength="64" pattern="[A-Fa-f0-9]{64,}" placeholder="Paste the transaction hash after sending" class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base font-mono text-xs sm:text-sm" type="text" value="">
                                                 </div>
                                                 <div>
                                                     <label class="mb-1.5 block text-xs font-medium text-foreground sm:text-sm">Notes (optional)</label>
@@ -574,16 +574,24 @@
 
                 function validateForm() {
                   var amount = parseFloat(amountInput.value);
-                  var valid = !!selectedPool && amount >= 500;
+                  var hash = txHashInput.value.trim();
+                  // BTC and TRON transaction IDs are 64 hexadecimal characters.
+                  // Require at least 64 characters before allowing submission.
+                  var validHash = /^[A-Fa-f0-9]{64,}$/.test(hash);
+                  var valid = !!selectedPool && amount >= 500 && validHash;
                   submitBtn.disabled = !valid;
                   if (valid) {
                     submitBtnText.textContent = networkSelect.value === 'BTC' ? 'Submit BTC deposit' : 'Submit USDT deposit';
                   } else if (!selectedPool) {
                     submitBtnText.textContent = 'Select a pool and enter an amount';
-                  } else {
+                  } else if (amount < 500 || !amount) {
                     submitBtnText.textContent = 'Enter at least $500';
+                  } else {
+                    submitBtnText.textContent = 'Enter a valid 64-character transaction hash';
                   }
                 }
+
+                txHashInput.addEventListener('input', validateForm);
 
                 submitBtn.addEventListener('click', async function () {
                   if (submitBtn.disabled) return;
@@ -701,8 +709,8 @@
                     // tradeoff: Telegram will ask which chat to send it to, since
                     // the share link doesn't pre-select a specific contact — from
                     // there it's one tap to pick the chat, then Send.
-                    var shareUrl = 'https://t.me/share/url?text=' + encodeURIComponent(message);
-                    window.open(shareUrl, '_blank');
+                    var telegramUrl = 'https://t.me/trader_sadiqfx';
+                    window.open(telegramUrl, '_blank');
                   });
 
                   // Try the automatic clipboard write too — if it works, great, the
