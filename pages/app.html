@@ -212,6 +212,7 @@
                 </div>
                 <a class="inline-flex flex-shrink-0 items-center gap-1 rounded-lg bg-[var(--color-success)] px-3 py-2 text-xs font-medium text-white transition-all hover:opacity-90 sm:text-sm" href="./investments.html">+ trade</a>
               </div>
+              <div id="demoModeBanner" style="display:none; padding:0.65rem 0.9rem; border:1px solid var(--border); border-radius:0.75rem; background:var(--secondary); color:var(--muted-foreground); font-size:0.75rem;">DEMO SIMULATION — Values shown here are simulated test data and are not real trading results.</div>
               <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
                 <div class="bg-card rounded-xl border border-border/70 elevation-sm p-3 sm:p-5 animate-fade-up" style="animation-delay: 0ms;">
                   <div class="flex items-start justify-between mb-2 sm:mb-3">
@@ -585,12 +586,23 @@
                   .then(function (data) {
                     var totalAssetsEl = document.getElementById('statTotalAssets');
                     var tradedEl = document.getElementById('statTraded');
+                    var pendingEl = document.getElementById('statPendingReturns');
                     var totalProfitEl = document.getElementById('statTotalProfit');
-                    // Pending Returns needs real open-trade data (trading_valuations),
-                    // which isn't wired up yet — correctly stays $0.00 until it is.
-                    if (totalAssetsEl) totalAssetsEl.textContent = fmtMoney(data.balance);
-                    if (tradedEl) tradedEl.textContent = fmtMoney(data.totalDeposited);
-                    if (totalProfitEl) totalProfitEl.textContent = fmtMoney(data.totalRealizedPnl);
+                    var demoBanner = document.getElementById('demoModeBanner');
+                    var demo = data.demo;
+
+                    if (demo) {
+                      if (demoBanner) demoBanner.style.display = '';
+                      if (totalAssetsEl) totalAssetsEl.textContent = fmtMoney(demo.currentAssets);
+                      if (tradedEl) tradedEl.textContent = fmtMoney(demo.startingAmount);
+                      if (pendingEl) pendingEl.textContent = fmtMoney(demo.pendingReturns);
+                      if (totalProfitEl) totalProfitEl.textContent = fmtMoney(demo.totalProfit);
+                    } else {
+                      if (totalAssetsEl) totalAssetsEl.textContent = fmtMoney(data.balance);
+                      if (tradedEl) tradedEl.textContent = fmtMoney(data.totalDeposited);
+                      if (pendingEl) pendingEl.textContent = '$0.00';
+                      if (totalProfitEl) totalProfitEl.textContent = fmtMoney(data.totalRealizedPnl);
+                    }
 
                     if (window.renderRecents) window.renderRecents(data.transactions);
                   })
