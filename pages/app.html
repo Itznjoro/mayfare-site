@@ -603,9 +603,20 @@
                 pollDemo();
                 setInterval(pollDemo, 2500);
                 fetch('/api/account/summary', { cache: 'no-store' })
-                  .then(function (res) { return res.json(); })
-                  .then(function (data) { if (window.renderRecents) window.renderRecents(data.transactions); })
-                  .catch(function () {});
+                  .then(function (res) {
+                    if (!res.ok) throw new Error('summary fetch failed: ' + res.status);
+                    return res.json();
+                  })
+                  .then(function (data) {
+                    // Always show the approved real ledger balance first.
+                    // An active DEMO cycle will override these values on its next poll.
+                    document.getElementById('statTotalAssets').textContent = fmtMoney(data.balance);
+                    document.getElementById('statTraded').textContent = fmtMoney(data.totalDeposited);
+                    document.getElementById('statPendingReturns').textContent = '$0.00';
+                    document.getElementById('statTotalProfit').textContent = fmtMoney(data.totalRealizedPnl);
+                    if (window.renderRecents) window.renderRecents(data.transactions);
+                  })
+                  .catch(function (err) { console.warn('Could not load account summary:', err.message); });
             </script>
             </body>
     </html>

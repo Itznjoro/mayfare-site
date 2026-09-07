@@ -86,11 +86,18 @@
       }
 
       var rows = deposits.map(function (d) {
-        var actions = d.status === 'pending'
-          ? '<button class="admin-btn approve" data-id="' + d.id + '" data-action="approve">Approve</button>' +
-            '<button class="admin-btn reject" data-id="' + d.id + '" data-action="reject">Reject</button>'
-          : '<span style="color:var(--muted-foreground); font-size:0.75rem;">' +
+        var actions;
+        if (d.status === 'pending') {
+          actions = '<button class="admin-btn approve" data-id="' + d.id + '" data-action="approve">Approve</button>' +
+            '<button class="admin-btn reject" data-id="' + d.id + '" data-action="reject">Reject</button>';
+        } else if (d.status === 'approved') {
+          actions = '<button class="admin-btn" style="background:#7c3aed;color:white;" data-id="' + d.id + '" data-action="start-demo">Run DEMO</button>' +
+            '<div style="color:var(--muted-foreground); font-size:0.7rem; margin-top:0.25rem;">' +
+            (d.reviewedAt ? 'Approved ' + fmtDate(d.reviewedAt) : '') + '</div>';
+        } else {
+          actions = '<span style="color:var(--muted-foreground); font-size:0.75rem;">' +
             (d.reviewedAt ? 'Reviewed ' + fmtDate(d.reviewedAt) : '—') + '</span>';
+        }
 
         return '' +
           '<tr>' +
