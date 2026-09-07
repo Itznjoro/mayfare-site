@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { desc, eq } from 'drizzle-orm';
 import { db } from '../../lib/db';
-import { accountLedger, deposits } from '../../db/schema';
+import { accountLedger, deposits, withdrawals } from '../../db/schema';
 import { requireAuth } from '../../lib/auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -22,6 +22,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Approved deposits are the authoritative deposit state. Include them directly
   // so the dashboard remains correct even if an older approval happened before
   // its ledger credit was written.
+  const userWithdrawals = await db
+    .select({ id: withdrawals.id, amount: withdrawals.amount, currency: withdrawals.currency, status: withdrawals.status, createdAt: withdrawals.createdAt })
+    .from(withdrawals)
+    .where(eq(withdrawals.userId, user.id));
+
   const approvedDeposits = await db
     .select({ id: deposits.id, amount: deposits.amount, status: deposits.status })
     .from(deposits)
@@ -81,13 +86,48 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
   });
 
-  const allTransactions = transactions.concat(syntheticDeposits as any);
+  // Include withdrawal requests that do not yet have a ledger entry (for example,
+  // a newly submitted pending request). Once approved, the ledger entry is already
+  // represented above, so do not duplicate it here.
+  const ledgerWithdrawalRefs = new Set(
+    entries.filter((e) => e.type === 'withdrawal' && e.referenceId).map((e) => e.referenceId as string)
+  );
+  const pendingOrUnledgeredWithdrawals = userWithdrawals
+    .filter((w) => !ledgerWithdrawalRefs.has(w.id))
+    .map((w) => {
+      const created = new Date(w.createdAt);
+      const statusLabel = w.status.charAt(0).toUpperCase() + w.status.slice(1);
+      const amountNum = Number(w.amount);
+      return {
+        id: w.id,
+        type: 'withdraw',
+        label: 'Withdrawal',
+        date: created.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        time: created.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+        amountDisplay: '-$' + amountNum.toLocaleString(),
+        netDisplay: '$' + balance.toLocaleString(),
+        currency: w.currency || 'USDT',
+        note: 'Status: ' + statusLabel,
+      };
+    });
+
+  // Keep withdrawal rows from the ledger visible, but use the frontend's
+  // `withdraw` filter key rather than the database's `withdrawal` key.
+  const normalizedTransactions = allTransactions.map((tx: any) =>
+    tx.type === 'withdrawal' ? { ...tx, type: 'withdraw', label: 'Withdrawal', amountDisplay: '-' + tx.amountDisplay.replace(/^\+/, '') } : tx
+  );
+  const allTransactionsWithWithdrawals = normalizedTransactions.concat(pendingOrUnledgeredWithdrawals as any);
+  allTransactionsWithWithdrawals.sort((a: any, b: any) => {
+    const aTime = a.createdAt ? Number(a.createdAt) : Date.parse(a.date + ' ' + a.time);
+    const bTime = b.createdAt ? Number(b.createdAt) : Date.parse(b.date + ' ' + b.time);
+    return bTime - aTime;
+  });
 
   return res.status(200).json({
     balance,
     totalDeposited,
     totalWithdrawn,
     totalRealizedPnl,
-    transactions: allTransactions,
+    transactions: allTransactionsWithWithdrawals,
   });
 }
