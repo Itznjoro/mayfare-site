@@ -4,7 +4,6 @@ import { db } from '../../lib/db';
 import { accountLedger } from '../../db/schema';
 import { requireAuth } from '../../lib/auth';
 import { getCurrentBalance } from '../../lib/ledger';
-import { getActiveDemo } from '../../lib/demo';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -16,7 +15,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!user) return;
 
   const balance = await getCurrentBalance(user.id);
-  const demo = await getActiveDemo(user.id);
 
   const entries = await db
     .select()
@@ -61,7 +59,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     totalWithdrawn,
     totalRealizedPnl,
     transactions,
-    demo,
-    demoMode: !!demo,
   });
 }

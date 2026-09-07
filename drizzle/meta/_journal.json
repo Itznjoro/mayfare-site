@@ -15,6 +15,13 @@
       "when": 1788434599530,
       "tag": "0001_financial_and_trading_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788434605000,
+      "tag": "0002_demo_simulation",
+      "breakpoints": true
     }
   ]
 }

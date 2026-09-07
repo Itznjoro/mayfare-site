@@ -186,3 +186,45 @@ export const tradingValuations = pgTable(
   })
 );
 
+
+
+// ============================================================
+// DEMO / SIMULATION DATA (never used as real account balance)
+// ============================================================
+
+export const demoCycleStatusEnum = pgEnum('demo_cycle_status', ['active', 'completed']);
+
+export const demoCycles = pgTable(
+  'demo_cycles',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id').notNull().references(() => users.id),
+    sourceDepositId: uuid('source_deposit_id').references(() => deposits.id),
+    startingAmount: numeric('starting_amount', { precision: 20, scale: 8 }).notNull(),
+    targetAmount: numeric('target_amount', { precision: 20, scale: 8 }).notNull(),
+    currentAmount: numeric('current_amount', { precision: 20, scale: 8 }).notNull(),
+    status: demoCycleStatusEnum('status').notNull().default('active'),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    userIdx: index('demo_cycles_user_idx').on(table.userId),
+    statusIdx: index('demo_cycles_status_idx').on(table.status),
+  })
+);
+
+export const demoCyclePoints = pgTable(
+  'demo_cycle_points',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    demoCycleId: uuid('demo_cycle_id').notNull().references(() => demoCycles.id, { onDelete: 'cascade' }),
+    value: numeric('value', { precision: 20, scale: 8 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    cycleIdx: index('demo_cycle_points_cycle_idx').on(table.demoCycleId),
+    createdIdx: index('demo_cycle_points_created_idx').on(table.createdAt),
+  })
+);

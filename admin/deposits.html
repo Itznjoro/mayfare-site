@@ -90,8 +90,7 @@
           ? '<button class="admin-btn approve" data-id="' + d.id + '" data-action="approve">Approve</button>' +
             '<button class="admin-btn reject" data-id="' + d.id + '" data-action="reject">Reject</button>'
           : '<span style="color:var(--muted-foreground); font-size:0.75rem;">' +
-            (d.reviewedAt ? 'Reviewed ' + fmtDate(d.reviewedAt) : '—') + '</span>' +
-            (d.status === 'approved' ? '<br><button class="admin-btn demo" data-user-id="' + d.userId + '" data-amount="' + d.amount + '" data-action="demo" style="margin-top:.4rem;background:#475569;color:white;">Start DEMO</button>' : '');
+            (d.reviewedAt ? 'Reviewed ' + fmtDate(d.reviewedAt) : '—') + '</span>';
 
         return '' +
           '<tr>' +
@@ -118,48 +117,22 @@
     async function handleAction(btn) {
       var id = btn.getAttribute('data-id');
       var action = btn.getAttribute('data-action');
-
-      if (action === 'demo') {
-        var userId = btn.getAttribute('data-user-id');
-        var amount = Number(btn.getAttribute('data-amount'));
-        var target = prompt('DEMO ONLY — enter target profit amount for this 24-hour simulation:', Math.round(amount * 0.10));
-        if (target === null) return;
-        var targetProfit = Number(target);
-        if (!Number.isFinite(targetProfit) || targetProfit <= 0) {
-          alert('Enter a valid positive target profit.');
-          return;
-        }
-        btn.disabled = true;
-        try {
-          var demoRes = await fetch('/api/admin/demo/start', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: userId, startingAmount: amount, targetProfit: targetProfit })
-          });
-          var demoData = await demoRes.json();
-          if (!demoRes.ok) {
-            alert(demoData.error || 'Could not start demo simulation.');
-            btn.disabled = false;
-            return;
-          }
-          alert('DEMO simulation started for 24 hours. The dashboard will show simulated values only.');
-        } catch (err) {
-          alert('Could not reach the server: ' + err.message);
-          btn.disabled = false;
-        }
-        return;
-      }
       var row = btn.closest('tr');
       row.querySelectorAll('.admin-btn').forEach(function (b) { b.disabled = true; });
 
       var body = {};
-      if (action === 'reject') {
+      if (action === 'start-demo') {
+        var target = prompt('Enter the DEMO target total assets for this simulation:');
+        if (target === null) { row.querySelectorAll('.admin-btn').forEach(function (b) { b.disabled = false; }); return; }
+        body.depositId = id;
+        body.targetAmount = target;
+      } else if (action === 'reject') {
         var note = prompt('Optional note for this rejection:');
         if (note) body.adminNote = note;
       }
 
       try {
-        var res = await fetch('/api/admin/deposits/' + id + '/' + action, {
+        var res = await fetch(action === 'start-demo' ? '/api/admin/demo/start' : '/api/admin/deposits/' + id + '/' + action, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
