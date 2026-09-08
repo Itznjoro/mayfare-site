@@ -92,7 +92,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const pendingDemoWithdrawals = demoWithdrawalRows
     .filter((row) => row.status === 'pending' && String(row.adminNote || '') === demoMarker)
     .reduce((sum, row) => sum + Number(row.amount), 0);
-  const withdrawableAmount = Math.max(currentAmount - pendingDemoWithdrawals, 0);
+  const withdrawableAmount = currentAmount;
 
   const chartPoints = minuteRows.map((p) => ({
     createdAt: new Date(p.bucket).toISOString(),
