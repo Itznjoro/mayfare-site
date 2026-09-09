@@ -618,7 +618,7 @@
                   if (!data) return;
                   var balance = Number(data.balance) || 0;
                   var traded = Number(data.totalDeposited) || 0;
-                  var realized = Number(data.totalRealizedPnl) || 0;
+                  var realized = Number(data.totalProfit ?? data.totalRealizedPnl) || 0;
 
                   // An approved deposit is immediately the user's Trade amount.
                   // Until a DEMO cycle is started, Total Assets is the real

@@ -503,7 +503,7 @@
                     var returnsEl = document.getElementById('txSummaryReturns');
                     var withdrawalsEl = document.getElementById('txSummaryWithdrawals');
                     if (depositsEl) depositsEl.textContent = '$' + data.totalDeposited.toLocaleString();
-                    if (returnsEl) returnsEl.textContent = '+$' + data.totalRealizedPnl.toLocaleString();
+                    if (returnsEl) returnsEl.textContent = '+$' + Number(data.totalProfit ?? data.totalRealizedPnl ?? 0).toLocaleString();
                     if (withdrawalsEl) withdrawalsEl.textContent = '-$' + data.totalWithdrawn.toLocaleString();
                   })
                   .catch(function (err) { console.warn('Could not load transactions:', err.message); });

@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { desc, eq } from 'drizzle-orm';
 import { db } from '../../lib/db';
-import { accountLedger, deposits, withdrawals } from '../../db/schema';
+import { accountLedger, deposits, withdrawals, demoCycles } from '../../db/schema';
 import { requireAuth } from '../../lib/auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -36,12 +36,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const balance = approvedDepositTotal + nonDepositLedger;
 
   const totalDeposited = approvedDepositTotal;
-  const totalWithdrawn = entries
-    .filter((e) => e.type === 'withdrawal')
-    .reduce((sum, e) => sum + Math.abs(Number(e.amount)), 0);
   const totalRealizedPnl = entries
     .filter((e) => e.type === 'realized_pnl')
     .reduce((sum, e) => sum + Number(e.amount), 0);
+
+  // DEMO cycle results are stored separately from the real account ledger.
+  // Completed DEMO cycles remain available after the active cycle disappears,
+  // so dashboard/profile/transactions can continue showing the earned return.
+  const userDemoCycles = await db
+    .select({
+      id: demoCycles.id,
+      startingAmount: demoCycles.startingAmount,
+      currentAmount: demoCycles.currentAmount,
+      status: demoCycles.status,
+      completedAt: demoCycles.completedAt,
+      updatedAt: demoCycles.updatedAt,
+    })
+    .from(demoCycles)
+    .where(eq(demoCycles.userId, user.id));
+
+  const activeDemoCycles = userDemoCycles.filter((c) => c.status === 'active').length;
+  const completedDemoCycles = userDemoCycles.filter((c) => c.status === 'completed').length;
+  const totalCompletedDemoProfit = userDemoCycles
+    .filter((c) => c.status === 'completed')
+    .reduce((sum, c) => sum + (Number(c.currentAmount) - Number(c.startingAmount)), 0);
+
+  const totalWithdrawn = (await db
+    .select({
+      amount: withdrawals.amount,
+      status: withdrawals.status,
+    })
+    .from(withdrawals)
+    .where(eq(withdrawals.userId, user.id)))
+    .filter((w) => w.status === 'approved' || w.status === 'completed')
+    .reduce((sum, w) => sum + Math.abs(Number(w.amount)), 0);
+
+  const totalProfit = totalRealizedPnl + totalCompletedDemoProfit;
   // Include approved deposits in Recent Deposits even if an older approval
   // predates the ledger credit. Current approvals still create the ledger row.
   const ledgerDepositRefs = new Set(
@@ -126,8 +156,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
 
+  const returnTransactions = userDemoCycles
+    .filter((c) => c.status === 'completed')
+    .map((c) => {
+      const created = new Date(c.completedAt || c.updatedAt);
+      const profit = Number(c.currentAmount) - Number(c.startingAmount);
+      const endingAmount = Number(c.currentAmount);
+      return {
+        id: 'return-' + c.id,
+        type: 'return' as const,
+        label: 'Return',
+        date: created.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        time: created.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+        amountDisplay: (profit >= 0 ? '+' : '-') + '$' + Math.abs(profit).toLocaleString(),
+        netDisplay: '$' + endingAmount.toLocaleString(),
+        currency: 'USDT',
+        note: 'DEMO cycle return',
+        createdAt: created.getTime(),
+      };
+    });
+
   const allTransactions = transactions
-    .concat(syntheticDeposits as any, withdrawalTransactions as any)
+    .concat(syntheticDeposits as any, withdrawalTransactions as any, returnTransactions as any)
     .sort((a: any, b: any) => Number(b.createdAt) - Number(a.createdAt));
 
   return res.status(200).json({
@@ -135,6 +185,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     totalDeposited,
     totalWithdrawn,
     totalRealizedPnl,
+    totalProfit,
+    activeDemoCycles,
+    completedDemoCycles,
+    totalCompletedDemoProfit,
     transactions: allTransactions,
   });
 }

@@ -321,11 +321,11 @@
                                                     <div class="text-[10px] uppercase tracking-wider text-muted-foreground">Returns</div>
                                                 </div>
                                                 <div class="px-4 py-3 text-center sm:py-4">
-                                                    <div class="text-base font-medium tabular-nums sm:text-lg text-foreground">0</div>
+                                                    <div class="text-base font-medium tabular-nums sm:text-lg text-foreground" id="profileStatActive">0</div>
                                                     <div class="text-[10px] uppercase tracking-wider text-muted-foreground">Active</div>
                                                 </div>
                                                 <div class="px-4 py-3 text-center sm:py-4">
-                                                    <div class="text-base font-medium tabular-nums sm:text-lg text-foreground">0</div>
+                                                    <div class="text-base font-medium tabular-nums sm:text-lg text-foreground" id="profileStatCompleted">0</div>
                                                     <div class="text-[10px] uppercase tracking-wider text-muted-foreground">Completed</div>
                                                 </div>
                                             </div>
@@ -431,7 +431,30 @@
                     <script>self.__next_f.push([1,"e:null\n12:[[\"$\",\"title\",\"0\",{\"children\":\"AlphaReserve\"}],[\"$\",\"meta\",\"1\",{\"name\":\"description\",\"content\":\"AlphaReserve — grow your crypto with our proven trading pool.\"}]]\n"])</script>
                     <next-route-announcer style="position: absolute;">
                     </next-route-announcer>
-                <script src="../scripts/auth-guard.js"></script>
+                <script>
+              (function () {
+                fetch('/api/account/summary', { cache: 'no-store' })
+                  .then(function (res) {
+                    if (!res.ok) throw new Error('summary fetch failed: ' + res.status);
+                    return res.json();
+                  })
+                  .then(function (data) {
+                    var returnsEl = document.getElementById('profileStatReturns');
+                    var depositedEl = document.getElementById('profileStatDeposited');
+                    var activeEl = document.getElementById('profileStatActive');
+                    var completedEl = document.getElementById('profileStatCompleted');
+
+                    if (returnsEl) returnsEl.textContent = '$' + Number(data.totalProfit ?? data.totalRealizedPnl ?? 0).toLocaleString();
+                    if (depositedEl) depositedEl.textContent = '$' + Number(data.totalDeposited || 0).toLocaleString();
+                    if (activeEl) activeEl.textContent = String(Number(data.activeDemoCycles || 0));
+                    if (completedEl) completedEl.textContent = String(Number(data.completedDemoCycles || 0));
+                  })
+                  .catch(function (err) {
+                    console.warn('Could not load profile statistics:', err.message);
+                  });
+              })();
+            </script>
+            <script src="../scripts/auth-guard.js"></script>
             <script src="../scripts/dashboard-nav.js"></script>
             </body>
             </html>
