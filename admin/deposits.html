@@ -96,6 +96,7 @@
             '<button class="admin-btn reject" data-id="' + d.id + '" data-action="reject">Reject</button>';
         } else if (d.status === 'approved') {
           actions = '<button class="admin-btn" style="background:#7c3aed;color:white;" data-id="' + d.id + '" data-action="start-demo">Run DEMO</button>' +
+            '<button class="admin-btn" style="background:#dc2626;color:white;" data-id="' + d.id + '" data-action="stoploss">Stop Loss</button>' +
             '<div style="color:var(--muted-foreground); font-size:0.7rem; margin-top:0.25rem;">' +
             (d.reviewedAt ? 'Approved ' + fmtDate(d.reviewedAt) : '') + '</div>';
         } else {
@@ -137,13 +138,20 @@
         if (target === null) { row.querySelectorAll('.admin-btn').forEach(function (b) { b.disabled = false; }); return; }
         body.depositId = id;
         body.targetAmount = target;
+      } else if (action === 'stoploss') {
+        if (!confirm('Stop the DEMO simulation for this deposit? This will remove the DEMO cycle and its simulated chart data. The original deposit record will not be changed.')) {
+          row.querySelectorAll('.admin-btn').forEach(function (b) { b.disabled = false; });
+          return;
+        }
+        body.depositId = id;
       } else if (action === 'reject') {
         var note = prompt('Optional note for this rejection:');
         if (note) body.adminNote = note;
       }
 
       try {
-        var res = await fetch(action === 'start-demo' ? '/api/admin/demo/start' : '/api/admin/deposits/' + id + '/' + action, {
+        var endpoint = action === 'start-demo' ? '/api/admin/demo/start' : action === 'stoploss' ? '/api/admin/demo/stoploss' : '/api/admin/deposits/' + id + '/' + action;
+        var res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),

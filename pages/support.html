@@ -439,7 +439,7 @@
               Email
              </div>
              <div class="text-xs text-muted-foreground">
-              support@nextlevel.com
+              mayfairforexcompany@gmail.com
              </div>
             </div>
            </div>
@@ -625,13 +625,21 @@
             <script src="../scripts/dashboard-nav.js"></script>
             <script>
               (function () {
+                var answers = [
+                  'Create an account, choose a plan (24 hours or 48-Hour), and send your deposit for approval.',
+                  'The minimum investment is $500 USDT for both pools.',
+                  'Returns are based on the profit made on the trade and the agreed payout.',
+                  '24-Hour pool profits are paid within 24 hours or less as long as the target profit gets hit. 48-Hour pool profits are paid within 48 hours or less as long as the target profit gets hit.',
+                  'Trading involves risk and returns are not guaranteed. Risk management is used to manage exposure, and any applicable refund policy depends on the stated terms.',
+                  'Go to Withdraw section, enter wallet address, select network, and submit request.'
+                ];
                 var faqButtons = document.querySelectorAll('.faq-toggle-btn');
-                faqButtons.forEach(function (btn) {
+                faqButtons.forEach(function (btn, index) {
                   var wrapper = btn.parentElement;
                   var icon = btn.querySelector('svg');
                   var answer = document.createElement('div');
                   answer.className = 'px-3 pb-3 text-xs text-muted-foreground sm:px-4 sm:pb-4 sm:text-sm';
-                  answer.textContent = 'Coming soon.';
+                  answer.textContent = answers[index] || '';
                   answer.style.display = 'none';
                   wrapper.appendChild(answer);
 

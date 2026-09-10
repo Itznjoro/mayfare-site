@@ -534,7 +534,7 @@
             </script>
             <script>
               (function () {
-                fetch('/api/account/summary', { cache: 'no-store' })
+                fetch('/api/account/summary', { cache: 'no-store', credentials: 'same-origin' })
                   .then(function (res) {
                     if (!res.ok) throw new Error('summary fetch failed: ' + res.status);
                     return res.json();
