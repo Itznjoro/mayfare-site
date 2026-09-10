@@ -192,7 +192,7 @@ export const tradingValuations = pgTable(
 // DEMO / SIMULATION DATA (never used as real account balance)
 // ============================================================
 
-export const demoCycleStatusEnum = pgEnum('demo_cycle_status', ['active', 'completed']);
+export const demoCycleStatusEnum = pgEnum('demo_cycle_status', ['active', 'completed', 'stopped']);
 
 export const demoCycles = pgTable(
   'demo_cycles',

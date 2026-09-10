@@ -61,6 +61,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .filter((c) => c.status === 'completed')
     .reduce((sum, c) => sum + (Number(c.currentAmount) - Number(c.startingAmount)), 0);
 
+  const latestDemoCycle = [...userDemoCycles].sort((a, b) => Number(new Date(b.updatedAt)) - Number(new Date(a.updatedAt)))[0];
+  const latestDemoCycleStatus = latestDemoCycle?.status || null;
+
   const totalWithdrawn = (await db
     .select({
       amount: withdrawals.amount,
@@ -189,6 +192,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     activeDemoCycles,
     completedDemoCycles,
     totalCompletedDemoProfit,
+    latestDemoCycleStatus,
     transactions: allTransactions,
   });
 }

@@ -32,8 +32,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     await db.transaction(async (tx) => {
       await tx.delete(demoCyclePoints).where(eq(demoCyclePoints.demoCycleId, cycle.id));
-      await tx.delete(withdrawals).where(eq(withdrawals.adminNote, `DEMO_SIMULATION:${cycle.id}`));
-      await tx.delete(demoCycles).where(eq(demoCycles.id, cycle.id));
+      await tx.update(demoCycles)
+        .set({ status: 'stopped', currentAmount: '0', completedAt: null, updatedAt: new Date() })
+        .where(eq(demoCycles.id, cycle.id));
     });
 
     return res.status(200).json({ stopped: true, demoCycleId: cycle.id });

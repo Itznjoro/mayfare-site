@@ -139,7 +139,7 @@
         body.depositId = id;
         body.targetAmount = target;
       } else if (action === 'stoploss') {
-        if (!confirm('Stop the DEMO simulation for this deposit? This will remove the DEMO cycle and its simulated chart data. The original deposit record will not be changed.')) {
+        if (!confirm('Stop the DEMO simulation for this deposit? This clears the simulated dashboard state and chart data. Transaction history and the original deposit record will not be changed.')) {
           row.querySelectorAll('.admin-btn').forEach(function (b) { b.disabled = false; });
           return;
         }

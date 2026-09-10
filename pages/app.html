@@ -726,8 +726,33 @@
                           return res.json();
                         })
                         .then(function (summary) {
-                          applySummaryData(summary);
-                          hideDemoNotice();
+                          if (summary && summary.latestDemoCycleStatus === 'stopped') {
+                            // A DEMO stop-loss clears the dashboard display only.
+                            // Transaction history and the underlying deposit records remain untouched.
+                            document.getElementById('statTotalAssets').textContent = '$0.00';
+                            document.getElementById('statTraded').textContent = '$0.00';
+                            document.getElementById('statPendingReturns').textContent = '$0.00';
+                            document.getElementById('statTotalProfit').textContent = '$0.00';
+                            var stoppedCurrent = document.getElementById('cycleCurrentAmount');
+                            var stoppedTarget = document.getElementById('cycleTargetAmount');
+                            var stoppedBar = document.getElementById('cycleProgressBar');
+                            var stoppedText = document.getElementById('cycleProgressText');
+                            if (stoppedCurrent) stoppedCurrent.textContent = '$0.00';
+                            if (stoppedTarget) stoppedTarget.textContent = '$0.00';
+                            if (stoppedBar) stoppedBar.style.width = '0%';
+                            if (stoppedText) stoppedText.textContent = '0.0% Complete';
+                            var stoppedPortfolioCurrent = document.getElementById('portfolioCurrent');
+                            var stoppedPortfolioProfit = document.getElementById('portfolioProfit');
+                            var stoppedPortfolioPayout = document.getElementById('portfolioPayout');
+                            if (stoppedPortfolioCurrent) stoppedPortfolioCurrent.textContent = '$0.00';
+                            if (stoppedPortfolioProfit) stoppedPortfolioProfit.textContent = '$0.00';
+                            if (stoppedPortfolioPayout) stoppedPortfolioPayout.textContent = '$0.00';
+                            window.renderPortfolioChart([], {});
+                            hideDemoNotice();
+                          } else {
+                            applySummaryData(summary);
+                            hideDemoNotice();
+                          }
                         });
                     })
                     .catch(function (err) {
