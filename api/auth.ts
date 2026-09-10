@@ -126,11 +126,48 @@ export async function handleSignup(req: VercelRequest, res: VercelResponse) {
   return res.status(201).json({ user: publicUser(user) });
 }
 
+export async function handleChangePassword(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const user = await getUserFromRequest(req);
+  if (!user) {
+    return res.status(401).json({ error: 'Not authenticated.' });
+  }
+
+  const { currentPassword, newPassword, confirmPassword } = req.body ?? {};
+  if (typeof currentPassword !== 'string' || typeof newPassword !== 'string' || typeof confirmPassword !== 'string') {
+    return res.status(400).json({ error: 'Current password, new password, and confirmation are required.' });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+  }
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ error: 'New passwords do not match.' });
+  }
+  if (currentPassword === newPassword) {
+    return res.status(400).json({ error: 'New password must be different from your current password.' });
+  }
+
+  const valid = await verifyPassword(currentPassword, user.passwordHash);
+  if (!valid) {
+    return res.status(401).json({ error: 'Current password is incorrect.' });
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+  await db.update(users).set({ passwordHash, updatedAt: new Date() }).where(eq(users.id, user.id));
+
+  return res.status(200).json({ ok: true, message: 'Password updated successfully.' });
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const route = String(req.query.route || '').replace(/^\/+|\/+$/g, '');
   if (route === 'login') return handleLogin(req,res);
   if (route === 'logout') return handleLogout(req,res);
   if (route === 'me') return handleMe(req,res);
   if (route === 'signup') return handleSignup(req,res);
+  if (route === 'change-password') return handleChangePassword(req,res);
   return res.status(404).json({ error: 'Not found' });
 }

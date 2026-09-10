@@ -339,7 +339,34 @@
                                                             <div class="text-xs font-medium text-foreground sm:text-sm">Password</div>
                                                             <div class="text-[10px] text-muted-foreground sm:text-xs">Use at least 6 characters. You'll get an email when it changes.</div>
                                                         </div>
-                                                        <button class="text-xs font-medium text-foreground hover:underline sm:text-sm">Change</button>
+                                                        <button type="button" id="changePasswordToggle" class="text-xs font-medium text-foreground hover:underline sm:text-sm">Change</button>
+                                                    </div>
+                                                    <div id="changePasswordPanel" class="mt-4 hidden rounded-lg bg-card p-3 sm:p-4">
+                                                        <div class="mb-4 flex items-center justify-between border-b border-border/70 pb-3">
+                                                            <div>
+                                                                <div class="text-sm font-medium text-foreground sm:text-base">Password</div>
+                                                                <div class="text-[10px] text-muted-foreground sm:text-xs">Use at least 6 characters. You'll get an email when it changes.</div>
+                                                            </div>
+                                                            <button type="button" id="changePasswordCancel" class="text-xs font-medium text-foreground hover:underline sm:text-sm">Cancel</button>
+                                                        </div>
+                                                        <form id="changePasswordForm" class="space-y-3" novalidate>
+                                                            <div>
+                                                                <label class="mb-1.5 block text-xs font-medium text-foreground sm:text-sm" for="currentPassword">Current password</label>
+                                                                <input id="currentPassword" name="currentPassword" type="password" autocomplete="current-password" required class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary" />
+                                                            </div>
+                                                            <div>
+                                                                <label class="mb-1.5 block text-xs font-medium text-foreground sm:text-sm" for="newPassword">New password</label>
+                                                                <input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="6" required class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary" />
+                                                            </div>
+                                                            <div>
+                                                                <label class="mb-1.5 block text-xs font-medium text-foreground sm:text-sm" for="confirmPassword">Confirm new password</label>
+                                                                <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="6" required class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary" />
+                                                            </div>
+                                                            <div id="changePasswordMessage" class="hidden rounded-lg px-3 py-2 text-xs" role="status" aria-live="polite"></div>
+                                                            <div class="flex justify-end pt-1">
+                                                                <button id="changePasswordSubmit" type="submit" class="rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm">Update password</button>
+                                                            </div>
+                                                        </form>
                                                     </div>
                                                 </div>
                                                 <div class="rounded-lg bg-secondary/50 p-3 sm:p-4">
@@ -432,6 +459,80 @@
                     <next-route-announcer style="position: absolute;">
                     </next-route-announcer>
                 <script>
+              (function () {
+                var toggle = document.getElementById('changePasswordToggle');
+                var panel = document.getElementById('changePasswordPanel');
+                var cancel = document.getElementById('changePasswordCancel');
+                var form = document.getElementById('changePasswordForm');
+                var message = document.getElementById('changePasswordMessage');
+                var submit = document.getElementById('changePasswordSubmit');
+
+                function showPanel(show) {
+                  if (!panel || !toggle) return;
+                  panel.classList.toggle('hidden', !show);
+                  toggle.textContent = show ? 'Cancel' : 'Change';
+                  if (show) {
+                    var current = document.getElementById('currentPassword');
+                    if (current) current.focus();
+                  }
+                }
+
+                function showMessage(text, success) {
+                  if (!message) return;
+                  message.textContent = text;
+                  message.classList.remove('hidden', 'bg-destructive/10', 'text-destructive', 'bg-[var(--bg-success)]', 'text-[var(--color-success)]');
+                  if (success) {
+                    message.classList.add('bg-[var(--bg-success)]', 'text-[var(--color-success)]');
+                  } else {
+                    message.classList.add('bg-destructive/10', 'text-destructive');
+                  }
+                }
+
+                if (toggle) toggle.addEventListener('click', function () { showPanel(panel && panel.classList.contains('hidden')); });
+                if (cancel) cancel.addEventListener('click', function () { showPanel(false); });
+
+                if (form) form.addEventListener('submit', async function (event) {
+                  event.preventDefault();
+                  var currentPassword = document.getElementById('currentPassword');
+                  var newPassword = document.getElementById('newPassword');
+                  var confirmPassword = document.getElementById('confirmPassword');
+                  if (!currentPassword || !newPassword || !confirmPassword) return;
+
+                  if (newPassword.value.length < 6) {
+                    showMessage('New password must be at least 6 characters.', false);
+                    return;
+                  }
+                  if (newPassword.value !== confirmPassword.value) {
+                    showMessage('New passwords do not match.', false);
+                    return;
+                  }
+
+                  if (submit) submit.disabled = true;
+                  if (message) message.classList.add('hidden');
+                  try {
+                    var response = await fetch('/api/auth/change-password', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        currentPassword: currentPassword.value,
+                        newPassword: newPassword.value,
+                        confirmPassword: confirmPassword.value
+                      })
+                    });
+                    var data = await response.json().catch(function () { return {}; });
+                    if (!response.ok) throw new Error(data.error || 'Could not update password.');
+                    showMessage('Password updated successfully.', true);
+                    form.reset();
+                    setTimeout(function () { showPanel(false); if (message) message.classList.add('hidden'); }, 1200);
+                  } catch (error) {
+                    showMessage(error.message || 'Could not update password.', false);
+                  } finally {
+                    if (submit) submit.disabled = false;
+                  }
+                });
+              })();
+            </script>
+            <script>
               (function () {
                 fetch('/api/account/summary', { cache: 'no-store' })
                   .then(function (res) {
