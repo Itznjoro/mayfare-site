@@ -18,8 +18,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!parsedAmount || parsedAmount <= 0) {
     return res.status(400).json({ error: 'Enter a valid deposit amount.' });
   }
-  if (parsedAmount < 500) {
-    return res.status(400).json({ error: 'Minimum deposit is $500.' });
+  if (parsedAmount < 150) {
+    return res.status(400).json({ error: 'Minimum deposit is $150.' });
   }
   if (typeof currency !== 'string' || !currency.trim()) {
     return res.status(400).json({ error: 'A currency/network is required.' });

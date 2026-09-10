@@ -303,8 +303,8 @@
                                 <button id="poolBtn48h" data-pool="48h" class="rounded-lg border bg-card p-3 text-left transition-all hover:bg-secondary/50 sm:p-4 border-border">
                                     <div class="mb-2 flex items-start justify-between">
                                         <div>
-                                            <div class="text-sm font-medium text-foreground sm:text-base">48H Pool</div>
-                                            <div class="text-[10px] text-muted-foreground sm:text-xs">48 hours · profits paid within 48h</div>
+                                            <div class="text-sm font-medium text-foreground sm:text-base">24H Pool</div>
+                                            <div class="text-[10px] text-muted-foreground sm:text-xs">24 hours · profits paid within 24h</div>
                                         </div>
                                     </div>
                                     <div class="text-lg font-semibold text-foreground sm:text-xl">10x ROI</div>
@@ -313,8 +313,8 @@
                                     <div class="absolute -top-1.5 right-2 rounded bg-[var(--color-success)] px-1.5 py-0.5 text-[9px] font-medium text-white sm:right-3 sm:px-2 sm:text-[10px]">Popular</div>
                                     <div class="mb-2 flex items-start justify-between">
                                         <div>
-                                            <div class="text-sm font-medium text-foreground sm:text-base">Weekly Pool</div>
-                                            <div class="text-[10px] text-muted-foreground sm:text-xs">7 days · profits paid after 7 days</div>
+                                            <div class="text-sm font-medium text-foreground sm:text-base">48H Pool</div>
+                                            <div class="text-[10px] text-muted-foreground sm:text-xs">48 hours · profits paid within 48h</div>
                                         </div>
                                     </div>
                                     <div class="text-lg font-semibold text-foreground sm:text-xl">10x ROI</div>
@@ -331,9 +331,9 @@
                                             <label class="mb-1.5 block text-xs font-medium text-foreground sm:text-sm">Amount (USD)</label>
                                             <div class="relative">
                                                 <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground sm:left-4">$</span>
-                                                <input id="depositAmountInput" inputmode="decimal" min="500" placeholder="500" class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base pl-7 sm:pl-8" type="number" value="">
+                                                <input id="depositAmountInput" inputmode="decimal" min="150" placeholder="150" class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base pl-7 sm:pl-8" type="number" value="">
                                             </div>
-                                            <p class="mt-1 text-[10px] text-muted-foreground">Minimum $500</p>
+                                            <p class="mt-1 text-[10px] text-muted-foreground">Minimum $150</p>
                                         </div>
                                         <div>
                                             <label class="mb-1.5 block text-xs font-medium text-foreground sm:text-sm">Network</label>
@@ -341,6 +341,7 @@
                                                 <select id="networkSelect" class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--color-success)] focus:outline-none focus:ring-1 focus:ring-[var(--color-success)]/50 sm:px-4 sm:py-3 sm:text-base appearance-none pr-10" aria-label="Deposit network">
                                                     <option value="TRC20">USDT (TRC20) · Tron (TRC20)</option>
                                                     <option value="BTC">Bitcoin (BTC) · Bitcoin</option>
+                                                    <option value="ETH">Ethereum (ETH) · Ethereum</option>
                                                 </select>
                                                 <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                     <polyline points="6 9 12 15 18 9" />
@@ -388,7 +389,7 @@
                                                     <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-success)] text-[10px] font-medium text-white sm:h-8 sm:w-8 sm:text-sm">1</div>
                                                     <div>
                                                         <div class="text-xs font-medium text-foreground sm:text-sm">Select Plan</div>
-                                                        <div class="text-[10px] text-muted-foreground sm:text-xs">48H or Weekly pool</div>
+                                                        <div class="text-[10px] text-muted-foreground sm:text-xs">24H or 48H pool</div>
                                                     </div>
                                                 </div>
                                                 <div class="flex items-center gap-3">
@@ -477,7 +478,7 @@
             <script src="../scripts/dashboard-nav.js"></script>
             <script>
               (function () {
-                var selectedPool = null; // '48h' | 'weekly' — nothing selected until the user clicks one
+                var selectedPool = null; // '24h' | '48h' — nothing selected until the user clicks one
                 var poolBtn48h = document.getElementById('poolBtn48h');
                 var poolBtnWeekly = document.getElementById('poolBtnWeekly');
                 var amountInput = document.getElementById('depositAmountInput');
@@ -523,7 +524,8 @@
                 }
                 var addresses = {
                   TRC20: 'T' + randomBase58(33),
-                  BTC: '1' + randomBase58(33),
+                  BTC: 'bc1qzhsf8te3anevshlnmakxjxhrwladf880tqtls9',
+                  ETH: '0x7BB5b22a38254091440e6bB3342aD67Ab663acE8',
                 };
 
                 function updateNetworkUI() {
@@ -534,6 +536,11 @@
                     addressNetworkBadge.textContent = 'BTC';
                     networkHintText.textContent = 'Send BTC on the Bitcoin network only';
                     submitBtnText.textContent = selectedPool ? 'Submit BTC deposit' : 'Select a pool and enter an amount';
+                  } else if (network === 'ETH') {
+                    addressInstructionText.textContent = 'Send ETH to this Ethereum address';
+                    addressNetworkBadge.textContent = 'ETH';
+                    networkHintText.textContent = 'Send ETH on the Ethereum network only';
+                    submitBtnText.textContent = selectedPool ? 'Submit ETH deposit' : 'Select a pool and enter an amount';
                   } else {
                     addressInstructionText.textContent = 'Send USDT to this Tron (TRC20) address';
                     addressNetworkBadge.textContent = 'USDT (TRC20)';
@@ -578,14 +585,14 @@
                   // BTC and TRON transaction IDs are 64 hexadecimal characters.
                   // Require at least 64 characters before allowing submission.
                   var validHash = /^[A-Fa-f0-9]{64,}$/.test(hash);
-                  var valid = !!selectedPool && amount >= 500 && validHash;
+                  var valid = !!selectedPool && amount >= 150 && validHash;
                   submitBtn.disabled = !valid;
                   if (valid) {
-                    submitBtnText.textContent = networkSelect.value === 'BTC' ? 'Submit BTC deposit' : 'Submit USDT deposit';
+                    submitBtnText.textContent = networkSelect.value === 'BTC' ? 'Submit BTC deposit' : (networkSelect.value === 'ETH' ? 'Submit ETH deposit' : 'Submit USDT deposit');
                   } else if (!selectedPool) {
                     submitBtnText.textContent = 'Select a pool and enter an amount';
-                  } else if (amount < 500 || !amount) {
-                    submitBtnText.textContent = 'Enter at least $500';
+                  } else if (amount < 150 || !amount) {
+                    submitBtnText.textContent = 'Enter at least $150';
                   } else {
                     submitBtnText.textContent = 'Enter a valid 64-character transaction hash';
                   }
@@ -596,9 +603,9 @@
                 submitBtn.addEventListener('click', async function () {
                   if (submitBtn.disabled) return;
                   var amount = amountInput.value;
-                  var networkLabel = networkSelect.value === 'BTC' ? 'Bitcoin (BTC)' : 'USDT (TRC20)';
+                  var networkLabel = networkSelect.value === 'BTC' ? 'Bitcoin (BTC)' : (networkSelect.value === 'ETH' ? 'Ethereum (ETH)' : 'USDT (TRC20)');
                   var address = addressEl.textContent;
-                  var poolLabel = (selectedPool === '48h' ? '48H Pool' : 'Weekly Pool') + ' (10x ROI)';
+                  var poolLabel = (selectedPool === '48h' ? '24H Pool' : '48H Pool') + ' (10x ROI)';
                   var hash = txHashInput.value.trim();
 
                   submitBtn.disabled = true;

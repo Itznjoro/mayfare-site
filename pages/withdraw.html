@@ -301,7 +301,7 @@
                                             <div class="grid grid-cols-3 gap-2" id="withdrawNetworkButtons">
                                                 <button data-network="TRC20" class="rounded-lg border px-2 py-2 text-[10px] font-medium transition-all sm:px-3 sm:py-2.5 sm:text-xs border-border text-muted-foreground hover:border-[oklch(0.21_0_0)/50]">TRC20</button>
                                                 <button data-network="ERC20" class="rounded-lg border px-2 py-2 text-[10px] font-medium transition-all sm:px-3 sm:py-2.5 sm:text-xs border-border text-muted-foreground hover:border-[oklch(0.21_0_0)/50]">ERC20</button>
-                                                <button data-network="BEP20" class="rounded-lg border px-2 py-2 text-[10px] font-medium transition-all sm:px-3 sm:py-2.5 sm:text-xs border-border text-muted-foreground hover:border-[oklch(0.21_0_0)/50]">BEP20</button>
+                                                <button data-network="BTC" class="rounded-lg border px-2 py-2 text-[10px] font-medium transition-all sm:px-3 sm:py-2.5 sm:text-xs border-border text-muted-foreground hover:border-[oklch(0.21_0_0)/50]">BTC</button>
                                             </div>
                                         </div>
                                         <label class="mb-3 flex cursor-pointer items-start gap-2.5 rounded-lg border border-border p-3 sm:mb-4">
@@ -448,22 +448,27 @@
 
                 function updateAddressRules() {
                   addressInput.maxLength = 42;
-                  addressInput.minLength = selectedNetwork === 'TRC20' ? 34 : (selectedNetwork ? 42 : 0);
+                  addressInput.minLength = selectedNetwork === 'TRC20' ? 34 : (selectedNetwork === 'BTC' ? 26 : (selectedNetwork ? 42 : 0));
                   addressInput.pattern = selectedNetwork === 'TRC20'
                     ? 'T[1-9A-HJ-NP-Za-km-z]{33}'
-                    : selectedNetwork
-                      ? '0x[a-fA-F0-9]{40}'
-                      : '';
+                    : selectedNetwork === 'BTC'
+                      ? '(bc1[ac-hj-np-z02-9]{11,71}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})'
+                      : selectedNetwork
+                        ? '0x[a-fA-F0-9]{40}'
+                        : '';
                   addressInput.placeholder = selectedNetwork === 'TRC20'
                     ? 'Enter your TRC20 address (34 characters)'
-                    : selectedNetwork
-                      ? 'Enter your ' + selectedNetwork + ' address (42 characters)'
-                      : 'Select a network first';
+                    : selectedNetwork === 'BTC'
+                      ? 'Enter your Bitcoin address'
+                      : selectedNetwork
+                        ? 'Enter your ' + selectedNetwork + ' address (42 characters)'
+                        : 'Select a network first';
                 }
 
                 function isValidAddress(address) {
                   if (selectedNetwork === 'TRC20') return /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address);
-                  if (selectedNetwork === 'ERC20' || selectedNetwork === 'BEP20') return /^0x[a-fA-F0-9]{40}$/.test(address);
+                  if (selectedNetwork === 'ERC20') return /^0x[a-fA-F0-9]{40}$/.test(address);
+                  if (selectedNetwork === 'BTC') return /^(bc1[ac-hj-np-z02-9]{11,71}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/.test(address);
                   return false;
                 }
 
@@ -504,7 +509,9 @@
                   if (!isValidAddress(address)) {
                     setHelper(selectedNetwork === 'TRC20'
                       ? 'Enter a valid TRC20 address (34 characters).'
-                      : 'Enter a valid ' + selectedNetwork + ' address (42 characters).', true);
+                      : selectedNetwork === 'BTC'
+                        ? 'Enter a valid Bitcoin address.'
+                        : 'Enter a valid ' + selectedNetwork + ' address (42 characters).', true);
                     submitBtn.disabled = true;
                     return;
                   }

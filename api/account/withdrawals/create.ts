@@ -9,7 +9,8 @@ const MIN_WITHDRAWAL = 50;
 
 function validDestination(network: string, address: string): boolean {
   if (network === 'TRC20') return /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address);
-  if (network === 'ERC20' || network === 'BEP20') return /^0x[a-fA-F0-9]{40}$/.test(address);
+  if (network === 'ERC20') return /^0x[a-fA-F0-9]{40}$/.test(address);
+  if (network === 'BTC') return /^(bc1[ac-hj-np-z02-9]{11,71}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/.test(address);
   return false;
 }
 
