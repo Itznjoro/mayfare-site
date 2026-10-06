@@ -7,14 +7,27 @@ import { db } from './db';
  * This never touches real account balances or trading tables.
  */
 export async function ensureDemoTables() {
+  // Keep the DEMO status enum compatible with Stop Loss. This is deliberately
+  // idempotent: it only creates the DEMO enum/table objects if they are missing
+  // and never changes real account balances, deposits, withdrawals, or ledger data.
   await db.execute(sql`
     DO $$
     BEGIN
-      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'demo_cycle_status') THEN
-        CREATE TYPE "demo_cycle_status" AS ENUM ('active', 'completed');
-      END IF;
+      CREATE TYPE "public"."demo_cycle_status"
+      AS ENUM ('active', 'completed', 'stopped');
+    EXCEPTION
+      WHEN duplicate_object THEN NULL;
     END
     $$;
+  `);
+
+  // If the enum already existed from the original DEMO migration, add the
+  // Stop Loss value without replacing or recreating the enum. Keeping this as
+  // a separate statement also avoids relying on transaction-specific enum
+  // behaviour on different PostgreSQL versions.
+  await db.execute(sql`
+    ALTER TYPE "public"."demo_cycle_status"
+    ADD VALUE IF NOT EXISTS 'stopped';
   `);
 
   await db.execute(sql`

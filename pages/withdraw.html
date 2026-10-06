@@ -521,7 +521,7 @@
                     return;
                   }
 
-                  setHelper(demoActive ? 'Ready to submit a DEMO withdrawal request. This will not move real funds.' : 'Ready to submit your withdrawal request.', false);
+                  setHelper(demoActive ? 'Ready to submit your withdrawal request.' : 'Ready to submit your withdrawal request.', false);
                   submitBtn.disabled = false;
                 }
 
@@ -568,8 +568,8 @@
                       balanceEl.textContent = '$' + availableBalance.toLocaleString();
                       var reserved = Number(demo.pendingDemoWithdrawals || 0);
                       setHelper(reserved > 0
-                        ? 'DEMO SIMULATION — $' + reserved.toLocaleString() + ' is reserved for pending withdrawal requests. No real funds are moved.'
-                        : 'DEMO SIMULATION — withdrawals are active for testing. Approved DEMO withdrawals reduce the simulated balance only.', false);
+                        ? '$' + reserved.toLocaleString() + ' is reserved for pending withdrawal requests.'
+                        : 'Withdrawals are active for this account cycle. Approved withdrawals reduce the cycle balance only.', false);
                     } else {
                       var summaryRes = await fetch('/api/account/summary', { cache: 'no-store' });
                       if (!summaryRes.ok) throw new Error('Could not load your account balance.');

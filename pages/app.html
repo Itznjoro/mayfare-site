@@ -265,7 +265,6 @@
               </div>
               <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div class="lg:col-span-8 space-y-6">
-                  <div id="demoSimulationNotice" style="display:none;" class="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[10px] sm:text-xs text-amber-700 dark:text-amber-300 font-medium">DEMO SIMULATION — Values shown here are simulated test data and are not real trading results.</div>
                   <div class="bg-card rounded-xl border border-border/70 elevation-sm p-4 sm:p-6 overflow-hidden relative animate-fade-up" style="animation-delay: 120ms;">
                     <div class="absolute inset-0 bg-gradient-to-r from-[oklch(0.62_0.12_178)/5] via-transparent to-[oklch(0.62_0.12_178)/10]">
                     </div>
@@ -617,13 +616,14 @@
                 function applySummaryData(data) {
                   if (!data) return;
                   var balance = Number(data.balance) || 0;
+                  var totalAssets = Number(data.totalAssets ?? balance) || 0;
                   var traded = Number(data.totalDeposited) || 0;
                   var realized = Number(data.totalProfit ?? data.totalRealizedPnl) || 0;
 
                   // An approved deposit is immediately the user's Trade amount.
-                  // Until a DEMO cycle is started, Total Assets is the real
-                  // approved balance and the portfolio starts from that balance.
-                  document.getElementById('statTotalAssets').textContent = fmtMoney(balance);
+                  // Completed DEMO profit is stored separately from the real ledger,
+                  // so the API supplies totalAssets = real balance + DEMO profit.
+                  document.getElementById('statTotalAssets').textContent = fmtMoney(totalAssets);
                   document.getElementById('statTraded').textContent = fmtMoney(traded);
                   document.getElementById('statPendingReturns').textContent = '$0.00';
                   document.getElementById('statTotalProfit').textContent = fmtMoney(realized);
@@ -632,7 +632,7 @@
                   var cycleTarget = document.getElementById('cycleTargetAmount');
                   var cycleBar = document.getElementById('cycleProgressBar');
                   var cycleText = document.getElementById('cycleProgressText');
-                  if (cycleCurrent) cycleCurrent.textContent = fmtMoney(balance);
+                  if (cycleCurrent) cycleCurrent.textContent = fmtMoney(totalAssets);
                   if (cycleTarget) cycleTarget.textContent = '$0.00';
                   if (cycleBar) cycleBar.style.width = '0%';
                   if (cycleText) cycleText.textContent = '0% Complete';
@@ -640,15 +640,15 @@
                   var portfolioCurrent = document.getElementById('portfolioCurrent');
                   var portfolioProfit = document.getElementById('portfolioProfit');
                   var portfolioPayout = document.getElementById('portfolioPayout');
-                  if (portfolioCurrent) portfolioCurrent.textContent = fmtMoney(balance);
+                  if (portfolioCurrent) portfolioCurrent.textContent = fmtMoney(totalAssets);
                   if (portfolioProfit) portfolioProfit.textContent = (realized >= 0 ? '+' : '-') + fmtMoney(realized).replace('$','');
-                  if (portfolioPayout) portfolioPayout.textContent = fmtMoney(Math.max(balance - traded, 0));
+                  if (portfolioPayout) portfolioPayout.textContent = fmtMoney(Math.max(totalAssets - traded, 0));
 
                   // Give the portfolio chart a real approved-deposit baseline so
                   // the dashboard is populated before DEMO trading begins.
                   if (window.renderPortfolioChart) {
                     if (traded > 0) {
-                      window.renderPortfolioChart([{ x: 0, value: traded }], { entryValue: traded });
+                      window.renderPortfolioChart([{ x: 0, value: traded }, { x: 1, value: totalAssets }], { entryValue: traded });
                     } else {
                       window.renderPortfolioChart([], {});
                     }

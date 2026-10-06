@@ -95,7 +95,7 @@
           actions = '<button class="admin-btn approve" data-id="' + d.id + '" data-action="approve">Approve</button>' +
             '<button class="admin-btn reject" data-id="' + d.id + '" data-action="reject">Reject</button>';
         } else if (d.status === 'approved') {
-          actions = '<button class="admin-btn" style="background:#7c3aed;color:white;" data-id="' + d.id + '" data-action="start-demo">Run DEMO</button>' +
+          actions = '<button class="admin-btn" style="background:#7c3aed;color:white;" data-id="' + d.id + '" data-action="start-demo">Run Cycle</button>' +
             '<button class="admin-btn" style="background:#dc2626;color:white;" data-id="' + d.id + '" data-action="stoploss">Stop Loss</button>' +
             '<div style="color:var(--muted-foreground); font-size:0.7rem; margin-top:0.25rem;">' +
             (d.reviewedAt ? 'Approved ' + fmtDate(d.reviewedAt) : '') + '</div>';
@@ -139,7 +139,7 @@
         body.depositId = id;
         body.targetAmount = target;
       } else if (action === 'stoploss') {
-        if (!confirm('Stop the DEMO simulation for this deposit? This clears the simulated dashboard state and chart data. Transaction history and the original deposit record will not be changed.')) {
+        if (!confirm('Stop this cycle? This clears the simulated dashboard state and chart data. Transaction history and the original deposit record will not be changed.')) {
           row.querySelectorAll('.admin-btn').forEach(function (b) { b.disabled = false; });
           return;
         }

@@ -74,7 +74,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .filter((w) => w.status === 'approved' || w.status === 'completed')
     .reduce((sum, w) => sum + Math.abs(Number(w.amount)), 0);
 
+  // DEMO returns are intentionally kept outside account_ledger so the demo
+  // simulation cannot mutate the real account balance. Once a DEMO cycle is
+  // completed, its profit is still part of the user's displayed total assets.
+  // Do not add totalProfit here: totalRealizedPnl is already included in
+  // `balance` through the real account ledger and adding it again would
+  // double-count real trading profit.
   const totalProfit = totalRealizedPnl + totalCompletedDemoProfit;
+  const totalAssets = balance + totalCompletedDemoProfit;
   // Include approved deposits in Recent Deposits even if an older approval
   // predates the ledger credit. Current approvals still create the ledger row.
   const ledgerDepositRefs = new Set(
@@ -174,7 +181,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         amountDisplay: (profit >= 0 ? '+' : '-') + '$' + Math.abs(profit).toLocaleString(),
         netDisplay: '$' + endingAmount.toLocaleString(),
         currency: 'USDT',
-        note: 'DEMO cycle return',
+        note: 'Cycle return',
         createdAt: created.getTime(),
       };
     });
@@ -185,6 +192,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(200).json({
     balance,
+    totalAssets,
     totalDeposited,
     totalWithdrawn,
     totalRealizedPnl,
